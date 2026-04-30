@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# ChromaDB persistent data
+chroma_data/
+
+# TypeScript build info
+*.tsbuildinfo
+
+# IDE
+.vscode/settings.json
+.idea/
