@@ -3,6 +3,8 @@ import { ChatOpenAI } from '@langchain/openai';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { getVectorStore } from '../lib/vectorStore';
 import { resumePrompt, compatibilityPrompt } from '../lib/prompts';
+import { saveResumeLatex, getResumeLatex } from '../lib/resumeArtifacts';
+import { compileLatexToPdfBuffer } from '../lib/latex';
 
 const router = Router();
 
@@ -54,15 +56,55 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
     });
 
     const chain = resumePrompt.pipe(llm).pipe(new StringOutputParser());
-    const result = await chain.invoke({ context, jobDescription });
+    const latex = await chain.invoke({ context, jobDescription });
+    const resumeId = saveResumeLatex(latex);
 
-    res.json({ compatible: true, result });
+    res.json({ compatible: true, latex, resumeId });
   } catch (error: unknown) {
     console.error('[/generate-resume] Error:', error);
     res.status(500).json({
       error: error instanceof Error ? error.message : 'Failed to generate resume',
     });
   }
+});
+
+router.get('/pdf/:id', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = req.params.id;
+    const latex = getResumeLatex(id);
+
+    if (!latex) {
+      res.status(404).json({ error: 'Resume artifact not found or expired' });
+      return;
+    }
+
+    const pdfBuffer = await compileLatexToPdfBuffer(latex);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="tailored-resume-${id}.pdf"`);
+    res.setHeader('Cache-Control', 'no-store');
+    res.status(200).send(pdfBuffer);
+  } catch (error: unknown) {
+    console.error('[/generate-resume/pdf/:id] Error:', error);
+    res.status(500).json({
+      error:
+        error instanceof Error
+          ? `Failed to compile LaTeX to PDF: ${error.message}`
+          : 'Failed to compile LaTeX to PDF',
+    });
+  }
+});
+
+router.get('/source/:id', (req: Request, res: Response): void => {
+  const id = req.params.id;
+  const latex = getResumeLatex(id);
+
+  if (!latex) {
+    res.status(404).json({ error: 'Resume artifact not found or expired' });
+    return;
+  }
+
+  res.json({ resumeId: id, latex });
 });
 
 export default router;

@@ -12,7 +12,10 @@ STRICT RULES — follow these without exception:
 4. Replace the content with the most relevant points from the Master Experience data (source: "projects").
 5. Quantify achievements wherever the data provides metrics (percentages, time saved, users impacted, etc.).
 6. Mirror the language and keywords from the Job Description naturally.
-7. Output clean, well-structured Markdown.`,
+7. Output ONLY valid LaTeX source for a complete resume document.
+8. Use a standard, compilable structure: \\documentclass, needed \\usepackage lines, \\begin{{document}}, and \\end{{document}}.
+9. Escape LaTeX special characters when needed (%, &, _, #, etc.).
+10. Do not wrap the output in markdown code fences or add explanations.`,
   ],
   [
     'human',
@@ -26,7 +29,7 @@ Job Description:
 
 ---
 
-Generate a tailored resume that maps my specific projects and achievements to the requirements in the Job Description above. Structure it as a complete resume with all standard sections.`,
+Generate a tailored resume that maps my specific projects and achievements to the requirements in the Job Description above. Return a complete, compilable LaTeX resume document.`,
   ],
 ]);
 
