@@ -7,6 +7,8 @@ dotenv.config();
 import resumeRouter from './routes/resume';
 import coverLetterRouter from './routes/coverLetter';
 import starRouter from './routes/starAnswers';
+import uploadsRouter from './routes/uploads';
+import logsRouter from './routes/logs';
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
@@ -21,6 +23,8 @@ app.use(express.json({ limit: '10mb' }));
 app.use('/generate-resume', resumeRouter);
 app.use('/generate-cover-letter', coverLetterRouter);
 app.use('/generate-star-answers', starRouter);
+app.use('/uploads', uploadsRouter);
+app.use('/logs', logsRouter);
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

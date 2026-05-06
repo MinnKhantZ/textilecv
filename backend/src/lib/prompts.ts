@@ -1,4 +1,19 @@
 import { ChatPromptTemplate } from '@langchain/core/prompts';
+import * as fs from 'fs';
+import * as path from 'path';
+
+const ABOUT_PATH = path.join(__dirname, '../../data/about.md');
+
+export function loadAboutMe(): string {
+  try {
+    if (fs.existsSync(ABOUT_PATH)) {
+      return fs.readFileSync(ABOUT_PATH, 'utf-8').trim();
+    }
+  } catch {
+    // about.md is optional
+  }
+  return '';
+}
 
 export const resumePrompt = ChatPromptTemplate.fromMessages([
   [
@@ -10,18 +25,19 @@ STRICT RULES — follow these without exception:
 2. If a required skill from the JD is not in the retrieved context, do NOT add it to the resume.
 3. Use the formatting structure from the Master Resume (source: "resume") as your layout reference.
 4. Replace the content with the most relevant points from the Master Experience data (source: "projects").
-5. Quantify achievements wherever the data provides metrics (percentages, time saved, users impacted, etc.).
-6. Mirror the language and keywords from the Job Description naturally.
-7. Output ONLY valid LaTeX source for a complete resume document.
-8. Use a standard, compilable structure: \\documentclass, needed \\usepackage lines, \\begin{{document}}, and \\end{{document}}.
-9. Escape LaTeX special characters when needed (%, &, _, #, etc.).
-10. Do not wrap the output in markdown code fences or add explanations.`,
+5. If an About Me / Identity section is provided, weave the candidate's strengths, values, and personal narrative naturally into the professional summary and any relevant sections.
+6. Quantify achievements wherever the data provides metrics (percentages, time saved, users impacted, etc.).
+7. Mirror the language and keywords from the Job Description naturally.
+8. Output ONLY valid LaTeX source for a complete resume document.
+9. Use a standard, compilable structure: \\documentclass, needed \\usepackage lines, \\begin{{document}}, and \\end{{document}}.
+10. Escape LaTeX special characters when needed (%, &, _, #, etc.).
+11. Do not wrap the output in markdown code fences or add explanations.`,
   ],
   [
     'human',
     `Retrieved Professional Data:
 {context}
-
+{aboutMeSection}
 ---
 
 Job Description:
@@ -42,16 +58,17 @@ STRICT RULES — follow these without exception:
 1. NEVER hallucinate. Only draw on information explicitly present in the retrieved context.
 2. Find the "Personal Why" in the data — the authentic motivation, passion, and values driving the candidate.
 3. Connect the candidate's story to the company's mission and team culture implied by the Job Description.
-4. Write in a genuine, human voice — not corporate boilerplate or buzzwords.
-5. Structure: Opening hook → Relevant achievement story → Why this company → Forward-looking close.
-6. Keep it to 3–4 concise paragraphs.
-7. Output clean Markdown.`,
+4. If an About Me / Identity section is provided, use the candidate's stated strengths, values, life achievements, and personal narrative as the emotional core of the letter.
+5. Write in a genuine, human voice — not corporate boilerplate or buzzwords.
+6. Structure: Opening hook → Relevant achievement story → Why this company → Forward-looking close.
+7. Keep it to 3–4 concise paragraphs.
+8. Output clean Markdown.`,
   ],
   [
     'human',
     `Retrieved Professional Data:
 {context}
-
+{aboutMeSection}
 ---
 
 Job Description:
@@ -73,15 +90,16 @@ STRICT RULES — follow these without exception:
 2. For each question, retrieve the most relevant and compelling technical challenge or achievement.
 3. DIVERSITY RULE: Use a DIFFERENT project or story for each question. Never repeat the same example.
 4. Format each answer with clear STAR labels: **Situation**, **Task**, **Action**, **Result**.
-5. Be specific — include technologies, team sizes, timelines, and metrics wherever the data provides them.
-6. Keep each answer focused and concise (200–350 words per answer).
-7. Output clean Markdown with each question as a header.`,
+5. If an About Me / Identity section is provided, incorporate the candidate's strengths and values naturally in the Result or reflection parts of relevant answers.
+6. Be specific — include technologies, team sizes, timelines, and metrics wherever the data provides them.
+7. Keep each answer focused and concise (200–350 words per answer).
+8. Output clean Markdown with each question as a header.`,
   ],
   [
     'human',
     `Retrieved Professional Data (diverse examples from different projects):
 {context}
-
+{aboutMeSection}
 ---
 
 Behavioral Questions:

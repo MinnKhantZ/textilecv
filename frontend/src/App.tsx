@@ -2,8 +2,9 @@ import { useState } from 'react'
 import ResumeTailor from './components/ResumeTailor'
 import CoverLetterArchitect from './components/CoverLetterArchitect'
 import StarGenerator from './components/StarGenerator'
+import ProfileManager from './components/ProfileManager'
 
-type Tab = 'resume' | 'cover' | 'star'
+type Tab = 'resume' | 'cover' | 'star' | 'profile'
 
 const TABS: { id: Tab; label: string; description: string; color: string }[] = [
   {
@@ -24,12 +25,19 @@ const TABS: { id: Tab; label: string; description: string; color: string }[] = [
     description: 'Behavioral interview answers',
     color: 'amber',
   },
+  {
+    id: 'profile',
+    label: 'Profile & Files',
+    description: 'Upload data · view history',
+    color: 'teal',
+  },
 ]
 
 const ACTIVE_CLASSES: Record<Tab, string> = {
   resume: 'text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50',
   cover: 'text-violet-600 border-b-2 border-violet-600 bg-violet-50',
   star: 'text-amber-600 border-b-2 border-amber-600 bg-amber-50',
+  profile: 'text-teal-600 border-b-2 border-teal-600 bg-teal-50',
 }
 
 export default function App() {
@@ -99,6 +107,7 @@ export default function App() {
         {activeTab === 'resume' && <ResumeTailor />}
         {activeTab === 'cover' && <CoverLetterArchitect />}
         {activeTab === 'star' && <StarGenerator />}
+        {activeTab === 'profile' && <ProfileManager />}
       </main>
 
       {/* ── Footer ──────────────────────────────────────────────────────────── */}
@@ -113,3 +122,5 @@ export default function App() {
     </div>
   )
 }
+
+

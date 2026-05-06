@@ -2,7 +2,8 @@ import { Router, Request, Response } from 'express';
 import { ChatOpenAI } from '@langchain/openai';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { getVectorStore } from '../lib/vectorStore';
-import { coverLetterPrompt, compatibilityPrompt } from '../lib/prompts';
+import { coverLetterPrompt, compatibilityPrompt, loadAboutMe } from '../lib/prompts';
+import { logGeneration } from '../lib/db';
 
 const router = Router();
 
@@ -53,8 +54,21 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       openAIApiKey: process.env.OPENAI_API_KEY,
     });
 
+    const aboutMe = loadAboutMe();
+    const aboutMeSection = aboutMe
+      ? `\n\n---\n\nAbout Me / Identity:\n${aboutMe}\n\n`
+      : '';
+
     const chain = coverLetterPrompt.pipe(llm).pipe(new StringOutputParser());
-    const result = await chain.invoke({ context, jobDescription });
+    const result = await chain.invoke({ context, jobDescription, aboutMeSection });
+
+    await logGeneration({
+      type: 'cover_letter',
+      jobDescription: jobDescription.slice(0, 2000),
+      outputText: result,
+      compatible: true,
+      preferences: typeof preferences === 'string' ? preferences : undefined,
+    });
 
     res.json({ compatible: true, result });
   } catch (error: unknown) {

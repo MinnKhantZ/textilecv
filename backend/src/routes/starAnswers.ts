@@ -3,7 +3,8 @@ import { ChatOpenAI } from '@langchain/openai';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { Document } from '@langchain/core/documents';
 import { getVectorStore } from '../lib/vectorStore';
-import { starPrompt } from '../lib/prompts';
+import { starPrompt, loadAboutMe } from '../lib/prompts';
+import { logGeneration } from '../lib/db';
 
 const router = Router();
 
@@ -53,8 +54,20 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       openAIApiKey: process.env.OPENAI_API_KEY,
     });
 
+    const aboutMe = loadAboutMe();
+    const aboutMeSection = aboutMe
+      ? `\n\n---\n\nAbout Me / Identity:\n${aboutMe}\n\n`
+      : '';
+
     const chain = starPrompt.pipe(llm).pipe(new StringOutputParser());
-    const result = await chain.invoke({ context, questions: questionsText });
+    const result = await chain.invoke({ context, questions: questionsText, aboutMeSection });
+
+    await logGeneration({
+      type: 'star_answers',
+      questions: validQuestions,
+      outputText: result,
+      compatible: true,
+    });
 
     res.json({ result });
   } catch (error: unknown) {

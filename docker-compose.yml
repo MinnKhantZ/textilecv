@@ -1,23 +1,9 @@
 services:
-  ingest:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    env_file:
-      - ./backend/.env
-    environment:
-      CHROMA_URL: http://chromadb:8000
-    depends_on:
-      - chromadb
-    command: npm run ingest
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
-
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    command: npm run dev
     ports:
       - "3001:3001"
     env_file:
@@ -25,8 +11,7 @@ services:
     environment:
       CHROMA_URL: http://chromadb:8000
     depends_on:
-      ingest:
-        condition: service_completed_successfully
+      - chromadb
     volumes:
       - ./backend:/app
       - /app/node_modules

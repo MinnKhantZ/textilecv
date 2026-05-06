@@ -2,9 +2,10 @@ import { Router, Request, Response } from 'express';
 import { ChatOpenAI } from '@langchain/openai';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { getVectorStore } from '../lib/vectorStore';
-import { resumePrompt, compatibilityPrompt } from '../lib/prompts';
+import { resumePrompt, compatibilityPrompt, loadAboutMe } from '../lib/prompts';
 import { saveResumeLatex, getResumeLatex } from '../lib/resumeArtifacts';
 import { compileLatexToPdfBuffer } from '../lib/latex';
+import { logGeneration } from '../lib/db';
 
 const router = Router();
 
@@ -55,9 +56,22 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       openAIApiKey: process.env.OPENAI_API_KEY,
     });
 
+    const aboutMe = loadAboutMe();
+    const aboutMeSection = aboutMe
+      ? `\n\n---\n\nAbout Me / Identity:\n${aboutMe}\n\n`
+      : '';
+
     const chain = resumePrompt.pipe(llm).pipe(new StringOutputParser());
-    const latex = await chain.invoke({ context, jobDescription });
+    const latex = await chain.invoke({ context, jobDescription, aboutMeSection });
     const resumeId = saveResumeLatex(latex);
+
+    await logGeneration({
+      type: 'resume',
+      jobDescription: jobDescription.slice(0, 2000),
+      outputText: latex,
+      compatible: true,
+      preferences: typeof preferences === 'string' ? preferences : undefined,
+    });
 
     res.json({ compatible: true, latex, resumeId });
   } catch (error: unknown) {
