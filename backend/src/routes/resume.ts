@@ -1,11 +1,20 @@
 import { Router, Request, Response } from 'express';
+import * as fs from 'fs';
+import * as path from 'path';
 import { ChatOpenAI } from '@langchain/openai';
 import { StringOutputParser } from '@langchain/core/output_parsers';
-import { getVectorStore } from '../lib/vectorStore';
+import { getVectorStore, retrieveContext } from '../lib/vectorStore';
 import { resumePrompt, compatibilityPrompt, loadAboutMe } from '../lib/prompts';
 import { saveResumeLatex, getResumeLatex } from '../lib/resumeArtifacts';
 import { compileLatexToPdfBuffer } from '../lib/latex';
 import { logGeneration } from '../lib/db';
+
+const SAMPLES_DIR = path.join(__dirname, '../../samples');
+
+function loadResumeTemplate(): string {
+  const templatePath = path.join(SAMPLES_DIR, 'resume_template.tex');
+  return fs.readFileSync(templatePath, 'utf-8');
+}
 
 const router = Router();
 
@@ -32,12 +41,12 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
         : '';
 
     const vectorStore = await getVectorStore();
-    const docs = await vectorStore.similaritySearch(jobDescription.trim(), 12);
+    const docs = await retrieveContext(vectorStore, jobDescription.trim());
     const context = docs.map((d) => d.pageContent).join('\n\n---\n\n');
 
     if (!forceGenerate) {
       const checkLlm = new ChatOpenAI({
-        modelName: 'gpt-4o-mini',
+        modelName: 'gpt-5.4-mini',
         temperature: 0,
         openAIApiKey: process.env.OPENAI_API_KEY,
       });
@@ -51,7 +60,7 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
     }
 
     const llm = new ChatOpenAI({
-      modelName: 'gpt-4o',
+      modelName: 'gpt-5.4-mini',
       temperature: 0.2,
       openAIApiKey: process.env.OPENAI_API_KEY,
     });
@@ -61,8 +70,9 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       ? `\n\n---\n\nAbout Me / Identity:\n${aboutMe}\n\n`
       : '';
 
+    const templateTex = loadResumeTemplate();
     const chain = resumePrompt.pipe(llm).pipe(new StringOutputParser());
-    const latex = await chain.invoke({ context, jobDescription, aboutMeSection });
+    const latex = await chain.invoke({ context, jobDescription, aboutMeSection, templateTex });
     const resumeId = saveResumeLatex(latex);
 
     await logGeneration({
@@ -119,6 +129,40 @@ router.get('/source/:id', (req: Request, res: Response): void => {
   }
 
   res.json({ resumeId: id, latex });
+});
+
+/**
+ * POST /generate-resume/compile
+ * Accepts raw LaTeX source and returns a compiled PDF.
+ * Used by the activity log to render historical resume entries as PDF.
+ */
+router.post('/compile', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { latex } = req.body as { latex?: unknown };
+
+    if (typeof latex !== 'string' || latex.trim().length === 0) {
+      res.status(400).json({ error: 'latex must be a non-empty string' });
+      return;
+    }
+    if (latex.length > 500_000) {
+      res.status(400).json({ error: 'latex exceeds the 500,000 character limit' });
+      return;
+    }
+
+    const pdfBuffer = await compileLatexToPdfBuffer(latex);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename="resume.pdf"');
+    res.setHeader('Cache-Control', 'no-store');
+    res.status(200).send(pdfBuffer);
+  } catch (error: unknown) {
+    console.error('[/generate-resume/compile] Error:', error);
+    res.status(500).json({
+      error: error instanceof Error
+        ? `Failed to compile LaTeX to PDF: ${error.message}`
+        : 'Failed to compile LaTeX to PDF',
+    });
+  }
 });
 
 export default router;

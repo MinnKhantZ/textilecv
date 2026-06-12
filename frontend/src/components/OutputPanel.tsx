@@ -131,7 +131,7 @@ export default function OutputPanel({
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               />
             </svg>
-            <p className="text-sm font-medium">GPT-4o is working on it…</p>
+            <p className="text-sm font-medium">GPT-5.4-mini is working on it…</p>
             <p className="text-xs">This usually takes 15–30 seconds</p>
           </div>
         ) : error ? (

@@ -4,7 +4,6 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-import { PDFLoader } from '@langchain/community/document_loaders/fs/pdf';
 import { Chroma } from '@langchain/community/vectorstores/chroma';
 import { OpenAIEmbeddings } from '@langchain/openai';
 import { Document } from '@langchain/core/documents';
@@ -89,32 +88,6 @@ export async function runIngest(): Promise<IngestResult> {
       .filter((d) => d.pageContent.length > 10);
     allDocs.push(...docs);
     sources.push(`about.md (${docs.length} chunks)`);
-  }
-
-  // ── master_resume.pdf ────────────────────────────────────────────────────
-  const pdfPath = path.join(DATA_DIR, 'master_resume.pdf');
-  if (fs.existsSync(pdfPath)) {
-    try {
-      const pdfLoader = new PDFLoader(pdfPath);
-      const rawDocs = await pdfLoader.load();
-      const docs = rawDocs
-        .map((doc) => {
-          // Strip null bytes and non-printable control characters that cause ChromaDB 422 errors
-          // eslint-disable-next-line no-control-regex
-          const clean = doc.pageContent.replace(/\0/g, '').replace(/[\x01-\x08\x0B\x0C\x0E-\x1F\x7F]/g, ' ').trim();
-          // ChromaDB v2 only accepts flat string/number/boolean metadata — filter out nested objects
-          const pageNum = (doc.metadata?.loc as { pageNumber?: number } | undefined)?.pageNumber
-            ?? (doc.metadata?.pageNumber as number | undefined)
-            ?? 0;
-          return new Document({ pageContent: clean, metadata: { source: 'resume', page: pageNum } });
-        })
-        .filter((doc) => doc.pageContent.length > 10); // skip empty/near-empty pages
-      allDocs.push(...docs);
-      sources.push(`master_resume.pdf (${docs.length} pages)`);
-    } catch (pdfErr: unknown) {
-      const msg = pdfErr instanceof Error ? pdfErr.message : String(pdfErr);
-      sources.push(`master_resume.pdf (skipped — could not extract text: ${msg})`);
-    }
   }
 
   if (allDocs.length === 0) {

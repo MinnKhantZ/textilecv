@@ -1,56 +1,132 @@
-# About Me — Sample File
+# About Me
 
-> **Instructions:** Replace everything in this file with your own personal narrative.
-> This file is used to personalize the professional summary in your resume, the opening
-> hook and "why this company" sections of cover letters, and the reflective parts of
-> STAR interview answers. Be honest and specific — the more personal detail you provide,
-> the more authentic the AI's output will be.
-
----
-
-## Who I Am
-
-I'm a software engineer who genuinely loves the craft — not just shipping features, but
-understanding the *why* behind architectural decisions and making systems that people can
-reason about confidently. I grew up tinkering with computers and writing small games, and
-that curiosity has never left me. Today it shows up as an obsession with clean APIs,
-observable systems, and teams where everyone feels safe asking "dumb" questions.
-
-Outside of work I'm an avid long-distance runner (two marathons), an amateur bread baker,
-and a mentor to first-generation college students learning to code.
+> **How to fill this file:** Replace every section below with your own personal narrative.
+> Each `##` section becomes a separate chunk in the vector store — so keep each section
+> self-contained and specific. Write in first person. The more concrete and personal the
+> detail, the more authentic and differentiated the AI output will be.
+> This file drives: (1) the header and Professional Summary on your resume, (2) the opening
+> hook and "why this company" paragraph of cover letters, and (3) the reflective Result
+> statements in STAR interview answers.
 
 ---
 
-## Core Strengths
+## Contact Information
 
-- **Systems thinking** — I naturally zoom out to the whole before diving into the part. I ask "what breaks if this fails?" before writing the first line of code.
-- **Clear communication** — I translate technical complexity into plain language for stakeholders and write documentation that people actually read.
-- **Ownership mentality** — I treat the product as my own responsibility, not just the ticket in my queue. I follow up, I close loops, I notice things that aren't mine to fix but matter anyway.
-- **Mentoring and teaching** — Some of my proudest moments have come from watching a junior engineer suddenly "get it" after a pairing session.
+Use these exact values to populate the resume header. The AI will copy them verbatim.
 
----
-
-## Life Achievements & Proud Moments
-
-- Ran my first marathon at age 28 after years of thinking I "wasn't a runner" — taught me that most of my limitations are stories I tell myself, not facts.
-- Built a mobile app as a side project that reached 8,000 active users with no marketing budget — just word of mouth and obsessive attention to user feedback.
-- Spent 6 months volunteering as a coding instructor at a community center, helping 12 adults from non-technical backgrounds land their first tech jobs.
-- Learned Spanish to conversational level as an adult — proof that sustained, deliberate practice beats raw talent every time.
+- **Full Name:** Jane Doe
+- **Email:** jane.doe@example.com
+- **Phone:** +1 (555) 123-4567
+- **Location:** San Francisco, CA (Open to Remote)
+- **LinkedIn:** https://linkedin.com/in/janedoe
+- **GitHub:** https://github.com/janedoe
+- **Portfolio / Website:** https://janedoe.dev
 
 ---
 
-## Values & What I'm Looking For
+## Who I Am and What Drives Me
 
-- I want to work on things that matter — problems with real human impact, not just metrics optimization.
-- I value psychological safety: teams where disagreement is welcome, mistakes are learning opportunities, and "I don't know" is an acceptable answer.
-- I believe the best engineering cultures are also the most human ones — curiosity, empathy, and craft over hierarchy and politics.
-- I'm looking for a place where I can grow into a technical leadership role while staying close to the code.
+I'm a software engineer with 7 years of experience building backend systems and data platforms at high-growth startups. What drives me is not just shipping features but designing systems that other engineers enjoy working in — clean APIs, observable infrastructure, and codebases where the next person can reason confidently about what's happening and why.
+
+I started coding as a teenager making small browser games. That same curiosity — poking at things until I understand the internals — still shows up today as an obsession with distributed systems, event-driven architectures, and honest post-mortems. I've grown most in environments that balance technical rigor with genuine care for the people doing the work.
+
+Outside engineering I'm a long-distance runner (two marathons), an amateur bread baker, and a mentor to first-generation college students learning to code through a local non-profit.
 
 ---
 
-## Working Style
+## Core Technical Strengths
 
-- I'm most productive with deep-work blocks in the morning, async communication, and clear written specs.
-- I prefer over-communication to under-communication, especially across time zones.
-- I review PRs the same day and expect the same from teammates — slow feedback loops kill momentum.
-- I give candid, kind feedback and genuinely want it in return.
+- **Backend systems design** — I've architected microservices, event-driven pipelines, and data platforms from 0→1 and scaled them to millions of daily events. I think in systems: failure modes, observability, operational burden, and the tradeoff between consistency and availability.
+- **Full-stack delivery** — Comfortable owning a feature end-to-end from database schema through API through React UI. I don't throw work over the wall.
+- **Infrastructure & DevOps** — I write Terraform, build CI/CD pipelines, set up alerting, and carry the pager. I believe engineers who deploy their code write better code.
+- **ML/AI integration** — Built production fraud detection models (scikit-learn) and more recently LLM-powered RAG pipelines (LangChain, OpenAI API, ChromaDB). I understand the operational realities of ML in production, not just the theory.
+- **Performance optimization** — Reduced API latency by 81% in one project and cut cloud costs by $120k/year in another. I profile before I optimize and measure after.
+
+---
+
+## Leadership and Collaboration Strengths
+
+- **Engineering leadership without the title** — I've defined team standards, run hiring loops, written technical RFCs that became org-wide policy, and presented engineering strategy to C-suite — all as an IC.
+- **Mentoring** — Some of my proudest career moments are junior engineers I've worked with who became confident, independent contributors. I pair, I give detailed PR reviews, and I make space for questions.
+- **Clear communication** — I translate technical complexity into plain language for stakeholders. I write documentation that people actually read. I ask "what decision does this doc need to enable?" before writing a single word.
+- **Ownership mentality** — I treat the product as my own responsibility. I follow up, I close loops, I notice the thing that's broken even when it's not in my ticket.
+
+---
+
+## Life Achievements and Proud Moments
+
+- Ran my first marathon at age 28 after years of telling myself I wasn't athletic — it taught me that most limitations are stories I tell myself, not facts. I now use running as a forcing function for deliberate practice in everything else.
+- Built `stream-bridge`, an open-source TypeScript library, as a weekend project that grew to 1,200+ GitHub stars and is used in production by 3 companies. Nobody asked me to build it; I built it because the problem annoyed me.
+- Volunteered 6 months as a coding instructor at a community center, helping 12 adults from non-technical backgrounds land their first tech jobs. Watching someone go from "I can't do this" to their first pull request merged is the best thing I've experienced in this industry.
+- Learned Spanish to conversational level as an adult through Anki, iTalki, and sheer stubbornness — proof that sustained, deliberate practice beats raw talent every time.
+- Led the post-mortem process after a high-severity production incident at Acme Corp, which resulted in a redesign of the alerting strategy and a 4x reduction in MTTR. Nobody likes incidents; I like making them impossible to repeat.
+
+---
+
+## Values and What I'm Looking For
+
+- **Impact over optics** — I want to work on real problems with real human consequences, not vanity metrics or features nobody asked for.
+- **Psychological safety** — Teams where disagreement is welcomed, mistakes become learning artifacts (not blame targets), and "I don't know" is a complete sentence.
+- **Technical craft** — I thrive in environments that take code quality, observability, and documentation seriously — not as bureaucracy, but as professional respect for the next person.
+- **Growth path** — I'm looking to deepen my technical leadership: owning a system from architecture to operations, influencing engineering direction, and eventually managing a small team of people I can grow.
+- **Remote-friendly or hybrid** — I've worked distributed for 4+ years and believe async-first teams write better software because they write better.
+
+---
+
+## Working Style and Preferences
+
+- **Deep work blocks** — I do my best architectural thinking in 3-hour uninterrupted stretches in the morning. I protect this time and expect teammates to do the same.
+- **Async by default** — I write thorough Slack messages and document decisions in writing rather than scheduling a meeting for every question. I respond to async messages within 4 hours during business hours.
+- **Fast PR cycles** — I review PRs the same day and expect the same. Slow feedback loops kill momentum and make it harder to reason about diffs.
+- **Direct and kind feedback** — I give candid code review comments that explain the *why*, and I genuinely want the same in return. I don't soften feedback into uselessness.
+- **Documentation habit** — I write ADRs (Architecture Decision Records) for significant choices, update runbooks after every incident, and keep READMEs current as a baseline of professional courtesy.
+
+
+---
+
+## Core Technical Strengths
+
+- **Backend systems design** — I've architected microservices, event-driven pipelines, and data platforms from 0→1 and scaled them to millions of daily events. I think in systems: failure modes, observability, operational burden, and the tradeoff between consistency and availability.
+- **Full-stack delivery** — Comfortable owning a feature end-to-end from database schema through API through React UI. I don't throw work over the wall.
+- **Infrastructure & DevOps** — I write Terraform, build CI/CD pipelines, set up alerting, and carry the pager. I believe engineers who deploy their code write better code.
+- **ML/AI integration** — Built production fraud detection models (scikit-learn) and more recently LLM-powered RAG pipelines (LangChain, OpenAI API, ChromaDB). I understand the operational realities of ML in production, not just the theory.
+- **Performance optimization** — Reduced API latency by 81% in one project and cut cloud costs by $120k/year in another. I profile before I optimize and measure after.
+
+---
+
+## Leadership and Collaboration Strengths
+
+- **Engineering leadership without the title** — I've defined team standards, run hiring loops, written technical RFCs that became org-wide policy, and presented engineering strategy to C-suite — all as an IC.
+- **Mentoring** — Some of my proudest career moments are junior engineers I've worked with who became confident, independent contributors. I pair, I give detailed PR reviews, and I make space for questions.
+- **Clear communication** — I translate technical complexity into plain language for stakeholders. I write documentation that people actually read. I ask "what decision does this doc need to enable?" before writing a single word.
+- **Ownership mentality** — I treat the product as my own responsibility. I follow up, I close loops, I notice the thing that's broken even when it's not in my ticket.
+
+---
+
+## Life Achievements and Proud Moments
+
+- Ran my first marathon at age 28 after years of telling myself I wasn't athletic — it taught me that most limitations are stories I tell myself, not facts. I now use running as a forcing function for deliberate practice in everything else.
+- Built `stream-bridge`, an open-source TypeScript library, as a weekend project that grew to 1,200+ GitHub stars and is used in production by 3 companies. Nobody asked me to build it; I built it because the problem annoyed me.
+- Volunteered 6 months as a coding instructor at a community center, helping 12 adults from non-technical backgrounds land their first tech jobs. Watching someone go from "I can't do this" to their first pull request merged is the best thing I've experienced in this industry.
+- Learned Spanish to conversational level as an adult through Anki, iTalki, and sheer stubbornness — proof that sustained, deliberate practice beats raw talent every time.
+- Led the post-mortem process after a high-severity production incident at Acme Corp, which resulted in a redesign of the alerting strategy and a 4x reduction in MTTR. Nobody likes incidents; I like making them impossible to repeat.
+
+---
+
+## Values and What I'm Looking For
+
+- **Impact over optics** — I want to work on real problems with real human consequences, not vanity metrics or features nobody asked for.
+- **Psychological safety** — Teams where disagreement is welcomed, mistakes become learning artifacts (not blame targets), and "I don't know" is a complete sentence.
+- **Technical craft** — I thrive in environments that take code quality, observability, and documentation seriously — not as bureaucracy, but as professional respect for the next person.
+- **Growth path** — I'm looking to deepen my technical leadership: owning a system from architecture to operations, influencing engineering direction, and eventually managing a small team of people I can grow.
+- **Remote-friendly or hybrid** — I've worked distributed for 4+ years and believe async-first teams write better software because they write better.
+
+---
+
+## Working Style and Preferences
+
+- **Deep work blocks** — I do my best architectural thinking in 3-hour uninterrupted stretches in the morning. I protect this time and expect teammates to do the same.
+- **Async by default** — I write thorough Slack messages and document decisions in writing rather than scheduling a meeting for every question. I respond to async messages within 4 hours during business hours.
+- **Fast PR cycles** — I review PRs the same day and expect the same. Slow feedback loops kill momentum and make it harder to reason about diffs.
+- **Direct and kind feedback** — I give candid code review comments that explain the *why*, and I genuinely want the same in return. I don't soften feedback into uselessness.
+- **Documentation habit** — I write ADRs (Architecture Decision Records) for significant choices, update runbooks after every incident, and keep READMEs current as a baseline of professional courtesy.

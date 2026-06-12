@@ -11,13 +11,6 @@ interface FileSlot {
 
 const FILE_SLOTS: FileSlot[] = [
   {
-    fileType: 'master_resume',
-    label: 'Master Resume',
-    description: 'Your baseline resume PDF used as formatting reference',
-    accept: '.pdf,application/pdf',
-    icon: '📄',
-  },
-  {
     fileType: 'experience',
     label: 'Master Experience',
     description: 'Detailed project & experience data in Markdown (.md)',

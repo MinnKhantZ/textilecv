@@ -1,0 +1,140 @@
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\input{glyphtounicode}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\addtolength{\oddsidemargin}{-0.6in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1.19in}
+\addtolength{\topmargin}{-.7in}
+\addtolength{\textheight}{1.4in}
+
+\raggedright
+\setlength{\tabcolsep}{0in}
+\pdfgentounicode=1
+
+\titleformat{\section}{
+  \vspace{-4pt}\large\bfseries
+}{}{0em}{}[\vspace{-5pt}]
+
+\newcommand{\resumeItem}[1]{\item\small{{#1}}}
+\newcommand{\resumeSubheading}[4]{\vspace{-2pt}\item
+  \begin{tabular*}{1.0\textwidth}[t]{l@{\extracolsep{\fill}}r}
+    \textbf{#1} & \textbf{\small #2} \\
+    \textit{\small#3} & \textit{\small #4} \\
+  \end{tabular*}\vspace{-7pt}}
+\newcommand{\resumeProjectHeading}[2]{\item
+  \begin{tabular*}{1.0\textwidth}{l@{\extracolsep{\fill}}r}
+    \textbf{#1} & \textbf{\small #2}\\
+  \end{tabular*}\vspace{-7pt}}
+\newcommand{\resumeItemListStart}{\begin{itemize}[leftmargin=0.15in]}
+\newcommand{\resumeItemListEnd}{\end{itemize}}
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.0in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+
+\begin{document}
+
+%----------------------------------
+% HEADER
+%----------------------------------
+\begin{center}
+  {\Huge \scshape FirstName LastName} \\ \vspace{3pt}
+  City, Country \\ \vspace{3pt}
+  \href{mailto:email@example.com}{email@example.com} \quad | \quad +XX XXX XXX XXXX \\ \vspace{3pt}
+  \href{https://linkedin.com/in/username}{linkedin.com/in/username} \quad | \quad
+  \href{https://github.com/username}{github.com/username} \quad | \quad
+  \href{https://personalwebsite.dev/}{personalwebsite.dev}
+\end{center}
+
+%----------------------------------
+% PROFILE
+%----------------------------------
+\section{Professional Summary}
+Full-Stack Developer with experience delivering scalable web and mobile applications. Specialized in multi-tenant architectures, API integrations, and cloud-native deployments. Focused on performance and production-grade development. Open for remote roles.
+
+%----------------------------------
+% TECHNICAL SKILLS
+%----------------------------------
+\section{Technical Skills}
+\resumeItemListStart
+  \resumeItem{\textbf{Languages:} Programming Language A, Language B, Language C}
+  \resumeItem{\textbf{Frontend:} Framework A, Framework B, Mobile Framework, State Management}
+  \resumeItem{\textbf{Backend:} Runtime A, Framework C, ORM Tool, SQL/NoSQL Databases}
+  \resumeItem{\textbf{DevOps:} Cloud Provider, Containerization, CI/CD, Automation}
+\resumeItemListEnd
+
+%----------------------------------
+% EXPERIENCE
+%----------------------------------
+\section{Experience}
+\resumeSubHeadingListStart
+  \resumeSubheading
+    {Company Name}{Start -- End}
+    {Full Stack Developer}{Remote}
+    \resumeItemListStart
+      \resumeItem{Led development of a multi-tenant platform (\textbf{Project Name}) using Framework D and Database C.}
+      \resumeItem{Built an automated module for content generation, improving operational efficiency.}
+      \resumeItem{Engineered a real-time analytics dashboard, reducing manual reporting.}
+      \resumeItem{Developed \textbf{Product Name}, a platform with access control and cloud storage.}
+      \resumeItem{Automated CI/CD pipelines, substantially reducing deployment time.}
+    \resumeItemListEnd
+\resumeSubHeadingListEnd
+
+%----------------------------------
+% PROJECTS
+%----------------------------------
+\section{Key Projects}
+\resumeSubHeadingListStart
+  \resumeProjectHeading{\href{https://personalwebsite.dev/\#projects}{Project Title One}}{}
+  \resumeItemListStart
+    \resumeItem{Built a web platform integrating ML models for key functionality.}
+    \resumeItem{Implemented authentication, ORM, and scalable database architecture.}
+  \resumeItemListEnd
+
+  \resumeProjectHeading{\href{https://personalwebsite.dev/\#projects}{Project Title Two}}{}
+  \resumeItemListStart
+    \resumeItem{Developed a cross-platform mobile app with interactive maps and info display.}
+    \resumeItem{Used mobile framework, runtime, and database for modular backend.}
+  \resumeItemListEnd
+
+  \resumeProjectHeading{\href{https://personalwebsite.dev/\#projects}{Project Title Three}}{}
+  \resumeItemListStart
+    \resumeItem{Created a mobile admin app with inventory tracking and analytics.}
+    \resumeItem{Integrated push notifications and real-time API updates.}
+  \resumeItemListEnd
+\resumeSubHeadingListEnd
+
+%----------------------------------
+% EDUCATION
+%----------------------------------
+\section{Education}
+\resumeSubHeadingListStart
+  \resumeSubheading
+    {University Name}{Start -- End}
+    {Degree, Field of Study | GPA: X.XX/Scale}{City}
+\resumeSubHeadingListEnd
+
+%----------------------------------
+% CERTIFICATIONS
+%----------------------------------
+\section{Certifications}
+\resumeItemListStart
+  \resumeItem{\textbf{Certification One} — Provider (Year)}
+  \resumeItem{\textbf{Certification Two} — Provider (Year)}
+  \resumeItem{\textbf{Certification Three} — Provider (Year)}
+\resumeItemListEnd
+
+\end{document}

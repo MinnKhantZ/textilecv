@@ -2,8 +2,7 @@ import { Router, Request, Response } from 'express';
 import { ChatOpenAI } from '@langchain/openai';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { Document } from '@langchain/core/documents';
-import { getVectorStore } from '../lib/vectorStore';
-import { starPrompt, loadAboutMe } from '../lib/prompts';
+import { getVectorStore } from '../lib/vectorStore';import { starPrompt, loadAboutMe } from '../lib/prompts';
 import { logGeneration } from '../lib/db';
 
 const router = Router();
@@ -28,12 +27,14 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
 
     const vectorStore = await getVectorStore();
 
-    // Retrieve diverse context across all questions to encourage story diversity
+    // Use MMR per question to get diverse, relevant stories
     const seenContent = new Set<string>();
     const allDocs: Document[] = [];
 
     for (const question of validQuestions) {
-      const docs = await vectorStore.similaritySearch(question, 6);
+      const docs = vectorStore.maxMarginalRelevanceSearch
+        ? await vectorStore.maxMarginalRelevanceSearch(question, { k: 5, fetchK: 20 }, undefined)
+        : await vectorStore.similaritySearch(question, 5);
       for (const doc of docs) {
         const key = doc.pageContent.slice(0, 120);
         if (!seenContent.has(key)) {
@@ -49,7 +50,7 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       .join('\n\n');
 
     const llm = new ChatOpenAI({
-      modelName: 'gpt-4o',
+      modelName: 'gpt-5.4-mini',
       temperature: 0.4,
       openAIApiKey: process.env.OPENAI_API_KEY,
     });

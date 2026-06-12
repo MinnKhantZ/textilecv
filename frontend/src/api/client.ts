@@ -43,11 +43,14 @@ export interface GenerationLogEntry {
   type: string
   job_description: string | null
   questions: string[] | null
-  output_text: string | null
-  artifact_path: string | null
   compatible: number
   generated_at: string
   preferences: string | null
+}
+
+export interface GenerationLogDetail extends GenerationLogEntry {
+  output_text: string | null
+  artifact_path: string | null
 }
 
 async function post<T>(endpoint: string, body: Record<string, unknown>): Promise<T> {
@@ -69,6 +72,27 @@ export const generateResume = (jobDescription: string, forceGenerate = false, pr
   post<GenerateOrCheckResponse>('/generate-resume', { jobDescription, forceGenerate, ...(preferences?.trim() && { preferences }) })
 
 export const getResumePdfUrl = (resumeId: string) => `${API_URL}/generate-resume/pdf/${encodeURIComponent(resumeId)}`
+
+/**
+ * Compiles raw LaTeX source server-side and returns a local blob URL for the resulting PDF.
+ * Used by the activity log to render historical resume entries as PDF previews.
+ * The caller is responsible for calling URL.revokeObjectURL() when done.
+ */
+export async function compileResumePdf(latex: string): Promise<string> {
+  const response = await fetch(`${API_URL}/generate-resume/compile`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ latex }),
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+    throw new Error((errorData as { error?: string }).error ?? `HTTP error ${response.status}`)
+  }
+
+  const blob = await response.blob()
+  return URL.createObjectURL(blob)
+}
 
 export const generateCoverLetter = (jobDescription: string, forceGenerate = false, preferences?: string) =>
   post<GenerateTextOrCheckResponse>('/generate-cover-letter', { jobDescription, forceGenerate, ...(preferences?.trim() && { preferences }) })
@@ -110,3 +134,8 @@ export async function getGenerationLogs(limit = 50): Promise<GenerationLogEntry[
   return response.json()
 }
 
+export async function getLogDetail(id: number): Promise<GenerationLogDetail> {
+  const response = await fetch(`${API_URL}/logs/${id}`)
+  if (!response.ok) throw new Error(`HTTP error ${response.status}`)
+  return response.json()
+}

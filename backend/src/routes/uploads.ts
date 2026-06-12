@@ -22,11 +22,6 @@ const ALLOWED_TYPES: Record<string, { ext: string; mimeTypes: string[]; storedNa
     mimeTypes: ['text/markdown', 'text/plain', 'application/octet-stream'],
     storedName: 'about.md',
   },
-  master_resume: {
-    ext: '.pdf',
-    mimeTypes: ['application/pdf'],
-    storedName: 'master_resume.pdf',
-  },
 };
 
 // Store files in memory temporarily, then write ourselves
@@ -90,10 +85,9 @@ function triggerIngest(): void {
 
 // ── Routes ───────────────────────────────────────────────────────────────────
 
-const SAMPLE_FILES: Record<string, { filename: string; contentType: string; fallbackPdf: boolean }> = {
-  master_resume: { filename: 'master_resume.pdf', contentType: 'application/pdf', fallbackPdf: true },
-  experience: { filename: 'master_experience.md', contentType: 'text/markdown; charset=utf-8', fallbackPdf: false },
-  about: { filename: 'about.md', contentType: 'text/markdown; charset=utf-8', fallbackPdf: false },
+const SAMPLE_FILES: Record<string, { filename: string; contentType: string }> = {
+  experience: { filename: 'master_experience.md', contentType: 'text/markdown; charset=utf-8' },
+  about: { filename: 'about.md', contentType: 'text/markdown; charset=utf-8' },
 };
 
 router.get('/samples/:fileType', async (req: Request, res: Response): Promise<void> => {
@@ -107,30 +101,15 @@ router.get('/samples/:fileType', async (req: Request, res: Response): Promise<vo
 
   const filePath = path.join(SAMPLES_DIR, config.filename);
 
-  // Serve the real file from samples/ if it exists
-  if (fs.existsSync(filePath)) {
-    const content = fs.readFileSync(filePath);
-    res.setHeader('Content-Type', config.contentType);
-    res.setHeader('Content-Disposition', `attachment; filename="sample_${config.filename}"`);
-    res.send(content);
+  if (!fs.existsSync(filePath)) {
+    res.status(404).json({ error: `Sample file not found. Place a file at backend/samples/${config.filename}` });
     return;
   }
 
-  // For master_resume PDF, generate a minimal sample when no file is present
-  if (config.fallbackPdf) {
-    try {
-      const { createSamplePdf } = await import('../lib/samplePdf');
-      const pdfBuffer = createSamplePdf();
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="sample_${config.filename}"`);
-      res.send(pdfBuffer);
-    } catch (err: unknown) {
-      res.status(500).json({ error: err instanceof Error ? err.message : 'Failed to generate sample PDF' });
-    }
-    return;
-  }
-
-  res.status(404).json({ error: `Sample file not found. Place a file at backend/samples/${config.filename}` });
+  const content = fs.readFileSync(filePath);
+  res.setHeader('Content-Type', config.contentType);
+  res.setHeader('Content-Disposition', `attachment; filename="sample_${config.filename}"`);
+  res.send(content);
 });
 
 router.get('/status', async (_req: Request, res: Response): Promise<void> => {

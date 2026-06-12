@@ -202,6 +202,28 @@ export async function getGenerationLogs(limit = 50): Promise<GenerationRecord[]>
   }));
 }
 
+export async function getGenerationLogById(id: number): Promise<GenerationRecord | null> {
+  const db = await openDb();
+  const result = db.exec(
+    `SELECT id, type, job_description, questions, output_text, artifact_path, compatible, generated_at, preferences
+     FROM generation_log WHERE id = ?`,
+    [id]
+  );
+  if (!result[0]?.values[0]) return null;
+  const [rid, type, jd, qs, ot, ap, comp, ga, pref] = result[0].values[0];
+  return {
+    id: rid as number,
+    type: type as string,
+    job_description: jd as string | null,
+    questions: qs as string | null,
+    output_text: ot as string | null,
+    artifact_path: ap as string | null,
+    compatible: comp as number,
+    generated_at: ga as string,
+    preferences: pref as string | null,
+  };
+}
+
 // ── Preferences ──────────────────────────────────────────────────────────────
 
 export async function setPreference(key: string, value: string): Promise<void> {

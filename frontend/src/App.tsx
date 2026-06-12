@@ -67,7 +67,7 @@ export default function App() {
             <div>
               <h1 className="text-2xl font-bold tracking-tight">AI Career Agent</h1>
               <p className="text-slate-300 text-xs">
-                GPT-4o · RAG · ChromaDB · text-embedding-3-small
+                GPT-5.4-mini · RAG · ChromaDB · text-embedding-3-small
               </p>
             </div>
           </div>

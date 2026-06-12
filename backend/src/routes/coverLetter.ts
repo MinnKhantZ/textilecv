@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { ChatOpenAI } from '@langchain/openai';
 import { StringOutputParser } from '@langchain/core/output_parsers';
-import { getVectorStore } from '../lib/vectorStore';
+import { getVectorStore, retrieveContext } from '../lib/vectorStore';
 import { coverLetterPrompt, compatibilityPrompt, loadAboutMe } from '../lib/prompts';
 import { logGeneration } from '../lib/db';
 
@@ -30,12 +30,12 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
         : '';
 
     const vectorStore = await getVectorStore();
-    const docs = await vectorStore.similaritySearch(jobDescription.trim(), 10);
+    const docs = await retrieveContext(vectorStore, jobDescription.trim());
     const context = docs.map((d) => d.pageContent).join('\n\n---\n\n');
 
     if (!forceGenerate) {
       const checkLlm = new ChatOpenAI({
-        modelName: 'gpt-4o-mini',
+        modelName: 'gpt-5.4-mini',
         temperature: 0,
         openAIApiKey: process.env.OPENAI_API_KEY,
       });
@@ -49,7 +49,7 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
     }
 
     const llm = new ChatOpenAI({
-      modelName: 'gpt-4o',
+      modelName: 'gpt-5.4-mini',
       temperature: 0.5,
       openAIApiKey: process.env.OPENAI_API_KEY,
     });
