@@ -1,1 +1,0 @@
-Always run linter after changes and fix lint issues

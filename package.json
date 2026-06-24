@@ -1,0 +1,18 @@
+{
+  "name": "textilecv-monorepo",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "build": "npm run build:client && npm run copy:client && npm run build:server && npm run copy:server && npm run build:cli",
+    "build:client": "npm run build -w packages/client",
+    "build:server": "npm run build -w packages/server",
+    "build:cli": "npm run build -w packages/cli",
+    "copy:client": "node scripts/copy-client-dist.js",
+    "copy:server": "node scripts/copy-server-dist.js",
+    "dev:server": "npm run dev -w packages/server",
+    "dev:client": "npm run dev -w packages/client",
+    "lint": "npm run lint --workspaces --if-present"
+  }
+}

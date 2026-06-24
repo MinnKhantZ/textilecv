@@ -2,8 +2,9 @@
 node_modules/
 
 # Build outputs
-dist/
-build/
+packages/*/dist
+packages/cli/client-dist
+packages/cli/server-dist
 
 # Environment files
 .env
@@ -22,6 +23,7 @@ Thumbs.db
 
 # ChromaDB persistent data
 chroma_data/
+chroma/
 
 # TypeScript build info
 *.tsbuildinfo
@@ -29,3 +31,11 @@ chroma_data/
 # IDE
 .vscode/settings.json
 .idea/
+
+# Agents
+.agents
+
+# TextileCV data (personal career info — never commit)
+packages/server/data/
+packages/cli/data/
+packages/cli/bin/chroma/
