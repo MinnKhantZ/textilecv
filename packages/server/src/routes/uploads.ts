@@ -3,7 +3,8 @@ import multer from 'multer';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
-import { recordUpload, getAllUploadsStatus, hashFile } from '../lib/db.js';
+import { recordUpload, getAllUploadsStatus, hashFile, saveProfile, getPreference } from '../lib/db.js';
+import { normalizeToText, isSupportedExtension, SUPPORTED_EXTENSIONS } from '../lib/parsers.js';
 // runIngest is loaded dynamically so a heavy-dependency import failure can never
 // prevent this router from being registered (which would cause 404 on all uploads).
 
@@ -14,15 +15,13 @@ const router = Router();
 const DATA_DIR = path.join(__dirname, '../../data');
 const SAMPLES_DIR = path.join(__dirname, '../../samples');
 
-const ALLOWED_TYPES: Record<string, { ext: string; mimeTypes: string[]; storedName: string }> = {
+const ALLOWED_TYPES: Record<string, { extensions: readonly string[]; storedName: string }> = {
   experience: {
-    ext: '.md',
-    mimeTypes: ['text/markdown', 'text/plain', 'application/octet-stream'],
+    extensions: SUPPORTED_EXTENSIONS,
     storedName: 'master_experience.md',
   },
   about: {
-    ext: '.md',
-    mimeTypes: ['text/markdown', 'text/plain', 'application/octet-stream'],
+    extensions: SUPPORTED_EXTENSIONS,
     storedName: 'about.md',
   },
 };
@@ -59,20 +58,50 @@ function triggerIngest(): void {
   ingestState = { ...ingestState, status: 'running', error: null };
 
   const run = async () => {
-    const { runIngest } = await import('../ingest');
+      const { runIngest } = await import('../ingest.js');
     return runIngest();
   };
 
   run()
-    .then((result) => {
+    .then(async (result) => {
+      console.log(`[ingest] ${result.success ? 'Complete' : 'Failed'}: ${result.sources.join(', ')}`);
+
+      if (!result.success) {
+        ingestState = {
+          status: 'error',
+          lastRun: new Date().toISOString(),
+          docCount: result.docCount,
+          sources: result.sources,
+          error: result.error ?? null,
+        };
+        return;
+      }
+
+      // Keep status as 'running' while profile extraction completes so the
+      // client continues polling and doesn't fetch a stale profile.
+      // Run structured profile extraction after a successful ingest
+      try {
+        const { extractProfile } = await import('../lib/profileExtractor.js');
+        const { profileTypeSchema } = await import('../lib/profileSchema.js');
+        const existingTypeRaw = await getPreference('profile_type');
+        const existingType = existingTypeRaw
+          ? (profileTypeSchema.safeParse(existingTypeRaw).success ? (existingTypeRaw as never) : undefined)
+          : undefined;
+        const profile = await extractProfile(existingType);
+        await saveProfile(JSON.stringify(profile));
+        console.log('[ingest] Profile extracted and saved.');
+      } catch (err) {
+        console.error('[ingest] Profile extraction failed:', err instanceof Error ? err.message : String(err));
+      }
+
+      // Now set ingest to 'done' — both indexing and extraction are complete
       ingestState = {
-        status: result.success ? 'done' : 'error',
+        status: 'done',
         lastRun: new Date().toISOString(),
         docCount: result.docCount,
         sources: result.sources,
-        error: result.error ?? null,
+        error: null,
       };
-      console.log(`[ingest] ${result.success ? 'Complete' : 'Failed'}: ${result.sources.join(', ')}`);
     })
     .catch((err: unknown) => {
       ingestState = {
@@ -149,14 +178,31 @@ router.post('/:fileType', upload.single('file'), async (req: Request, res: Respo
     }
 
     const originalExt = path.extname(req.file.originalname).toLowerCase();
-    if (originalExt !== config.ext) {
-      res.status(400).json({ error: `${fileType} must be a ${config.ext} file` });
+    if (!isSupportedExtension(originalExt)) {
+      res.status(400).json({ error: `${fileType} must be one of: ${SUPPORTED_EXTENSIONS.join(', ')}` });
+      return;
+    }
+
+    // Normalize the uploaded file to plain text, then store as .md so the
+    // existing ingest pipeline (which reads .md) works unchanged.
+    let normalizedText: string;
+    try {
+      normalizedText = await normalizeToText(req.file.buffer, originalExt);
+    } catch (parseErr) {
+      res.status(400).json({
+        error: `Failed to parse ${originalExt} file: ${parseErr instanceof Error ? parseErr.message : String(parseErr)}`,
+      });
+      return;
+    }
+
+    if (!normalizedText.trim()) {
+      res.status(400).json({ error: 'The uploaded file contains no extractable text.' });
       return;
     }
 
     fs.mkdirSync(DATA_DIR, { recursive: true });
     const storedPath = path.join(DATA_DIR, config.storedName);
-    fs.writeFileSync(storedPath, req.file.buffer);
+    fs.writeFileSync(storedPath, normalizedText, 'utf-8');
 
     const contentHash = hashFile(req.file.buffer);
     const id = await recordUpload(

@@ -146,7 +146,7 @@ This compiles the client, copies dist into the CLI package, compiles the server,
 ## Tech Stack
 
 - **Runtime**: Node.js, Express, TypeScript (ESM)
-- **AI**: LangChain.js, OpenAI (`gpt-4o`, `text-embedding-3-small`)
+- **AI**: LangChain.js, OpenAI (`gpt-5.4-mini`, `text-embedding-3-small`)
 - **Vector Store**: ChromaDB (Python, external)
 - **LaTeX**: `node-latex` + `pdflatex` (MiKTeX / TeX Live)
 - **Database**: `sql.js` (SQLite WASM) for generation logs and preferences

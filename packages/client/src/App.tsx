@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ResumeTailor from './components/ResumeTailor'
 import CoverLetterArchitect from './components/CoverLetterArchitect'
 import StarGenerator from './components/StarGenerator'
 import ProfileManager from './components/ProfileManager'
+import OnboardingModal from './components/OnboardingModal'
 
 type Tab = 'resume' | 'cover' | 'star' | 'profile'
 
@@ -42,9 +43,17 @@ const ACTIVE_CLASSES: Record<Tab, string> = {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('resume')
+  const [showOnboarding, setShowOnboarding] = useState(false)
+
+  useEffect(() => {
+    if (!localStorage.getItem('textilecv_onboarded')) {
+      setShowOnboarding(true)
+    }
+  }, [])
 
   return (
     <div className="min-h-screen bg-slate-50">
+      {showOnboarding && <OnboardingModal onSelect={() => setShowOnboarding(false)} />}
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <header className="bg-gradient-to-r from-slate-900 to-indigo-900 text-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">

@@ -8,6 +8,7 @@ import coverLetterRouter from './routes/coverLetter.js';
 import starRouter from './routes/starAnswers.js';
 import uploadsRouter from './routes/uploads.js';
 import logsRouter from './routes/logs.js';
+import profileRouter from './routes/profile.js';
 
 export interface ServerConfig {
   allowedOrigins?: string[];
@@ -20,7 +21,7 @@ export function createApp(config: ServerConfig = {}): express.Application {
     config.allowedOrigins ??
     (process.env.ALLOWED_ORIGINS
       ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
-      : ['http://localhost:5173', 'http://127.0.0.1:5173']);
+      : ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:5174', 'http://127.0.0.1:5174']);
 
   app.use(
     cors({
@@ -38,6 +39,7 @@ export function createApp(config: ServerConfig = {}): express.Application {
   app.use('/generate-star-answers', starRouter);
   app.use('/uploads', uploadsRouter);
   app.use('/logs', logsRouter);
+  app.use('/profile', profileRouter);
 
   app.get('/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });

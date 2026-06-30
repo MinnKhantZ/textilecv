@@ -56,6 +56,12 @@ function applySchema(db: Database): void {
       value TEXT NOT NULL,
       updated_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS profile (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      data TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
   `);
 }
 
@@ -251,6 +257,25 @@ export async function getAllPreferences(): Promise<Record<string, string>> {
   const result = db.exec('SELECT key, value FROM preferences ORDER BY key');
   if (!result[0]) return {};
   return Object.fromEntries(result[0].values.map(([k, v]) => [k as string, v as string]));
+}
+
+// ── Profile (structured) ─────────────────────────────────────────────────────
+
+export async function saveProfile(data: string): Promise<void> {
+  const db = await openDb();
+  const now = new Date().toISOString();
+  db.run(
+    `INSERT INTO profile (id, data, updated_at) VALUES (1, ?, ?)
+     ON CONFLICT(id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at`,
+    [data, now]
+  );
+  persist(db);
+}
+
+export async function getProfileData(): Promise<string | null> {
+  const db = await openDb();
+  const result = db.exec('SELECT data FROM profile WHERE id = 1');
+  return (result[0]?.values[0]?.[0] as string) ?? null;
 }
 
 // ── Utility ──────────────────────────────────────────────────────────────────

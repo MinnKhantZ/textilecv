@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import FileUploader from './FileUploader'
 import ActivityLog from './ActivityLog'
+import CompletenessPanel from './CompletenessPanel'
 import { getUploadsStatus, getGenerationLogs, type UploadsStatusResponse, type GenerationLogEntry, type IngestState } from '../api/client'
 
 function IngestBanner({ ingest }: { ingest: IngestState }) {
@@ -28,6 +29,7 @@ export default function ProfileManager() {
   const [logs, setLogs] = useState<GenerationLogEntry[]>([])
   const [loadingStatus, setLoadingStatus] = useState(true)
   const [loadingLogs, setLoadingLogs] = useState(true)
+  const [completenessRefreshKey, setCompletenessRefreshKey] = useState(0)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const refreshStatus = useCallback(async () => {
@@ -64,6 +66,8 @@ export default function ProfileManager() {
           clearInterval(pollRef.current)
           pollRef.current = null
         }
+        // Ingest + profile extraction complete — refresh the completeness panel
+        setCompletenessRefreshKey((k) => k + 1)
       }
     }, 2000)
   }, [refreshStatus])
@@ -80,6 +84,7 @@ export default function ProfileManager() {
     void refreshStatus().then((status) => {
       if (status === 'running') startPolling()
     })
+    setCompletenessRefreshKey((k) => k + 1)
   }, [refreshStatus, startPolling])
 
   return (
@@ -96,6 +101,9 @@ export default function ProfileManager() {
       ) : (
         <FileUploader uploadStatus={statusData.files} onUploadComplete={onUploadComplete} />
       )}
+
+      {/* ── Completeness panel ──────────────────────────────────────────── */}
+      <CompletenessPanel refreshKey={completenessRefreshKey} />
 
       {/* ── Ingest status banner ─────────────────────────────────────────── */}
       <IngestBanner ingest={statusData.ingest} />

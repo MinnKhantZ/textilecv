@@ -13,15 +13,15 @@ const FILE_SLOTS: FileSlot[] = [
   {
     fileType: 'experience',
     label: 'Master Experience',
-    description: 'Detailed project & experience data in Markdown (.md)',
-    accept: '.md,text/markdown,text/plain',
+    description: 'Detailed project & experience data (.md, .txt, .pdf, .docx)',
+    accept: '.md,.txt,.pdf,.docx,text/markdown,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     icon: '🗂️',
   },
   {
     fileType: 'about',
     label: 'About Me / Identity',
-    description: 'Who you are, strengths, values, and life achievements in Markdown (.md)',
-    accept: '.md,text/markdown,text/plain',
+    description: 'Who you are, strengths, values, and life achievements (.md, .txt, .pdf, .docx)',
+    accept: '.md,.txt,.pdf,.docx,text/markdown,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     icon: '🙋',
   },
 ]

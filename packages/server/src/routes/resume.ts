@@ -5,10 +5,14 @@ import { fileURLToPath } from 'url';
 import { ChatOpenAI } from '@langchain/openai';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { getVectorStore, retrieveContext } from '../lib/vectorStore.js';
-import { resumePrompt, compatibilityPrompt, loadAboutMe } from '../lib/prompts.js';
+import { resumePrompt, compatibilityPrompt } from '../lib/prompts.js';
 import { saveResumeLatex, getResumeLatex } from '../lib/resumeArtifacts.js';
 import { compileLatexToPdfBuffer } from '../lib/latex.js';
-import { logGeneration } from '../lib/db.js';
+import { logGeneration, getProfileData } from '../lib/db.js';
+import { profileSchema, emptyProfile, type Profile } from '../lib/profileSchema.js';
+import { buildProfileGroundTruth, OPTIONAL_SECTION_TEMPLATES } from '../lib/sectionTemplates.js';
+import { injectHeader } from '../lib/latexHeaderInjector.js';
+import { validateLatex, buildCorrectiveNote } from '../lib/outputValidator.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -68,14 +72,49 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       openAIApiKey: process.env.OPENAI_API_KEY,
     });
 
-    const aboutMe = loadAboutMe();
-    const aboutMeSection = aboutMe
-      ? `\n\n---\n\nAbout Me / Identity:\n${aboutMe}\n\n`
-      : '';
+    // Load structured profile (ground truth for header, links, factual fields)
+    let profile: Profile = emptyProfile();
+    try {
+      const profileJson = await getProfileData();
+      if (profileJson) {
+        const parsed = profileSchema.safeParse(JSON.parse(profileJson));
+        if (parsed.success) profile = parsed.data;
+      }
+    } catch {
+      // profile may not exist yet — proceed with empty profile
+    }
 
+    const profileGroundTruth = buildProfileGroundTruth(profile);
     const templateTex = loadResumeTemplate();
     const chain = resumePrompt.pipe(llm).pipe(new StringOutputParser());
-    const latex = await chain.invoke({ context, jobDescription, aboutMeSection, templateTex });
+
+    let latex = await chain.invoke({
+      context,
+      jobDescription,
+      templateTex,
+      profileGroundTruth,
+      optionalSections: OPTIONAL_SECTION_TEMPLATES,
+    });
+
+    // Deterministic header injection — guarantees correct contact info & links
+    latex = injectHeader(latex, profile);
+
+    // Validate output; auto-retry once if issues found, then flag remaining warnings
+    let validationWarnings = validateLatex(latex, profile);
+    if (!validationWarnings.valid) {
+      console.warn('[/generate-resume] Validation issues — retrying once:', validationWarnings.warnings);
+      const correctiveNote = buildCorrectiveNote(validationWarnings.warnings);
+      latex = await chain.invoke({
+        context,
+        jobDescription: `${jobDescription}${correctiveNote}`,
+        templateTex,
+        profileGroundTruth,
+        optionalSections: OPTIONAL_SECTION_TEMPLATES,
+      });
+      latex = injectHeader(latex, profile);
+      validationWarnings = validateLatex(latex, profile);
+    }
+
     const resumeId = saveResumeLatex(latex);
 
     await logGeneration({
@@ -86,7 +125,14 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       preferences: typeof preferences === 'string' ? preferences : undefined,
     });
 
-    res.json({ compatible: true, latex, resumeId });
+    res.json({
+      compatible: true,
+      latex,
+      resumeId,
+      ...(validationWarnings.warnings.length > 0
+        ? { validationWarnings: validationWarnings.warnings }
+        : {}),
+    });
   } catch (error: unknown) {
     console.error('[/generate-resume] Error:', error);
     res.status(500).json({

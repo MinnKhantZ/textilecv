@@ -2,10 +2,14 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 import fs from 'fs';
+import os from 'os';
+import dotenv from 'dotenv';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CLIENT_DIST = path.resolve(__dirname, '../client-dist');
 const SERVER_DIST = path.resolve(__dirname, '../server-dist');
+
+const CONFIG_DIR = path.join(os.homedir(), '.textilecv');
 
 export interface StudioConfig {
   port: number;
@@ -20,6 +24,12 @@ export async function startStudio(config: StudioConfig): Promise<void> {
         'Run `npm run build` from the monorepo root to build and bundle everything.\n'
     );
     process.exit(1);
+  }
+
+  // Load .env from ~/.textilecv/ before any server module reads env vars
+  const envPath = path.join(CONFIG_DIR, '.env');
+  if (fs.existsSync(envPath)) {
+    dotenv.config({ path: envPath });
   }
 
   // Set env vars before any server module reads them

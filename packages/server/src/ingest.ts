@@ -7,6 +7,7 @@ dotenv.config();
 
 import { Chroma } from '@langchain/community/vectorstores/chroma';
 import { OpenAIEmbeddings } from '@langchain/openai';
+import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 import { Document } from '@langchain/core/documents';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -58,8 +59,50 @@ export interface IngestResult {
 }
 
 /**
+ * Removes documents with duplicate pageContent, keeping the first occurrence.
+ */
+function dedupeDocs(docs: Document[]): Document[] {
+  const seen = new Set<string>();
+  const out: Document[] = [];
+  for (const d of docs) {
+    const key = d.pageContent.trim();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(d);
+  }
+  return out;
+}
+
+const MAX_CHUNK_SIZE = 1500;
+
+/**
+ * Splits any chunk larger than MAX_CHUNK_SIZE using RecursiveCharacterTextSplitter
+ * so oversized sections (e.g. a headerless file or a very long project) don't
+ * become one giant embedding. Preserves original metadata on each sub-chunk.
+ */
+async function splitOversizedChunks(docs: Document[]): Promise<Document[]> {
+  const splitter = new RecursiveCharacterTextSplitter({
+    chunkSize: MAX_CHUNK_SIZE,
+    chunkOverlap: 150,
+  });
+  const out: Document[] = [];
+  for (const doc of docs) {
+    if (doc.pageContent.length <= MAX_CHUNK_SIZE) {
+      out.push(doc);
+      continue;
+    }
+    const subChunks = await splitter.splitText(doc.pageContent);
+    for (const text of subChunks) {
+      out.push(new Document({ pageContent: text, metadata: { ...doc.metadata } }));
+    }
+  }
+  return out;
+}
+
+/**
  * Re-ingests all data files from backend/data/ into ChromaDB.
- * Safe to call multiple times — always rebuilds the collection from scratch.
+ * Safe to call multiple times — always rebuilds the collection from scratch by
+ * deleting the existing collection before re-indexing all documents.
  */
 export async function runIngest(): Promise<IngestResult> {
   if (!process.env.OPENAI_API_KEY) {
@@ -78,8 +121,12 @@ export async function runIngest(): Promise<IngestResult> {
   // ── master_experience.md ─────────────────────────────────────────────────
   const mdPath = path.join(DATA_DIR, 'master_experience.md');
   if (fs.existsSync(mdPath)) {
-    const docs = splitMarkdownByHeaders(fs.readFileSync(mdPath, 'utf-8'), 'projects')
-      .filter((d) => d.pageContent.length > 10);
+    const docs = await splitOversizedChunks(
+      dedupeDocs(
+        splitMarkdownByHeaders(fs.readFileSync(mdPath, 'utf-8'), 'projects')
+          .filter((d) => d.pageContent.length > 10)
+      )
+    );
     allDocs.push(...docs);
     sources.push(`master_experience.md (${docs.length} chunks)`);
   }
@@ -87,14 +134,29 @@ export async function runIngest(): Promise<IngestResult> {
   // ── about.md ─────────────────────────────────────────────────────────────
   const aboutPath = path.join(DATA_DIR, 'about.md');
   if (fs.existsSync(aboutPath)) {
-    const docs = splitMarkdownByHeaders(fs.readFileSync(aboutPath, 'utf-8'), 'about')
-      .filter((d) => d.pageContent.length > 10);
+    const docs = await splitOversizedChunks(
+      dedupeDocs(
+        splitMarkdownByHeaders(fs.readFileSync(aboutPath, 'utf-8'), 'about')
+          .filter((d) => d.pageContent.length > 10)
+      )
+    );
     allDocs.push(...docs);
     sources.push(`about.md (${docs.length} chunks)`);
   }
 
   if (allDocs.length === 0) {
     return { success: false, docCount: 0, sources: [], error: 'No data files found in backend/data/' };
+  }
+
+  // Delete the existing collection so re-ingest truly rebuilds from scratch
+  // instead of accumulating duplicate documents on every upload.
+  try {
+    const { ChromaClient } = await import('chromadb');
+    const client = new ChromaClient({ path: chromaUrl });
+    await client.deleteCollection({ name: COLLECTION_NAME });
+  } catch {
+    // Collection does not exist yet or Chroma unreachable — safe to ignore;
+    // Chroma.fromDocuments below will recreate it.
   }
 
   await Chroma.fromDocuments(allDocs, embeddings, {

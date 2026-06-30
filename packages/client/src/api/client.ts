@@ -143,3 +143,75 @@ export async function getLogDetail(id: number): Promise<GenerationLogDetail> {
   if (!response.ok) throw new Error(`HTTP error ${response.status}`)
   return response.json()
 }
+
+// ── Profile ──────────────────────────────────────────────────────────────────
+
+export type ProfileType = 'student' | 'engineering' | 'design' | 'business' | 'academic' | 'trades' | 'other'
+
+export interface ProfileLink {
+  type: string
+  url: string
+  label?: string
+}
+
+export interface Profile {
+  contact: {
+    name: string
+    email: string
+    phone?: string
+    location?: string
+    links?: ProfileLink[]
+  }
+  summary?: { title?: string; yearsExperience?: string | number; domain?: string; workPreferences?: string }
+  skills?: { category: string; items: string[] }[]
+  experience?: { company: string; title: string; dates: string; location?: string }[]
+  projects?: { name: string; links?: ProfileLink[] }[]
+  education?: { institution: string; degree: string; field?: string; gpa?: string; dates: string; location?: string }[]
+  certifications?: { name: string; provider?: string; year?: string }[]
+  publications?: { title: string; venue?: string; year?: string; url?: string }[]
+  languages?: { language: string; proficiency?: string }[]
+  awards?: { title: string; issuer?: string; year?: string }[]
+  courses?: { name: string; provider?: string; year?: string }[]
+  profileType?: ProfileType
+  extractedAt: string
+}
+
+export type Criticality = 'critical' | 'recommended' | 'optional'
+
+export interface FieldCheck {
+  key: string
+  label: string
+  present: boolean
+  criticality: Criticality
+  tip: string
+}
+
+export interface CompletenessResult {
+  fields: FieldCheck[]
+  score: number
+  hasSubstantiveSection: boolean
+}
+
+export interface ProfileResponse {
+  profile: Profile
+  completeness: CompletenessResult
+  profileType: ProfileType
+}
+
+export async function getProfile(): Promise<ProfileResponse> {
+  const response = await fetch(`${API_URL}/profile`)
+  if (!response.ok) throw new Error(`HTTP error ${response.status}`)
+  return response.json()
+}
+
+export async function setProfileType(profileType: ProfileType): Promise<void> {
+  const response = await fetch(`${API_URL}/profile/type`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ profileType }),
+  })
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+    throw new Error((errorData as { error?: string }).error ?? `HTTP error ${response.status}`)
+  }
+}

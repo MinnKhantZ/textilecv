@@ -16,3 +16,12 @@ if (!existsSync(src)) {
 
 cpSync(src, dest, { recursive: true });
 console.log('Copied packages/server/dist → packages/cli/server-dist');
+
+// Also copy samples/ (resume_template.tex, sample .md files) so the CLI can
+// resolve them at runtime via __dirname-relative paths.
+const samplesSrc = join(root, 'packages', 'server', 'samples');
+const samplesDest = join(root, 'packages', 'cli', 'samples');
+if (existsSync(samplesSrc)) {
+  cpSync(samplesSrc, samplesDest, { recursive: true });
+  console.log('Copied packages/server/samples → packages/cli/samples');
+}
