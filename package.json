@@ -13,6 +13,8 @@
     "copy:server": "node scripts/copy-server-dist.js",
     "dev:server": "npm run dev -w packages/server",
     "dev:client": "npm run dev -w packages/client",
+    "dev:landing": "npm run dev -w packages/landing",
+    "build:landing": "npm run build -w packages/landing",
     "publish:cli": "npm run build && npm publish -w packages/cli",
     "lint": "npm run lint --workspaces --if-present"
   }

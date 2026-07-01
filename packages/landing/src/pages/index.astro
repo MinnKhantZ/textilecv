@@ -1,0 +1,605 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const features = [
+  {
+    title: 'Resume Tailor',
+    desc: 'Paste a job description and get a custom-tailored LaTeX resume matched to your real projects, skills, and experience.',
+    icon: 'resume',
+  },
+  {
+    title: 'Cover Letter Architect',
+    desc: 'Narrative-driven cover letters that map your background to the role with specific evidence from your profile.',
+    icon: 'letter',
+  },
+  {
+    title: 'STAR Generator',
+    desc: 'Behavioral interview answers built from your actual experience — Situation, Task, Action, Result, ready to practice.',
+    icon: 'star',
+  },
+  {
+    title: 'LaTeX PDF Compilation',
+    desc: 'Server-side pdflatex compilation with fallback template repair. Download polished PDFs and raw LaTeX source.',
+    icon: 'pdf',
+  },
+  {
+    title: 'RAG Pipeline',
+    desc: 'Chunked markdown ingested into ChromaDB, retrieved via MMR for diverse, relevant context on every generation.',
+    icon: 'rag',
+  },
+  {
+    title: 'Profile Manager',
+    desc: 'Upload PDF, DOCX, and TXT files. View generation history, manage preferences, and track profile completeness.',
+    icon: 'profile',
+  },
+  {
+    title: 'Encrypted Vault',
+    desc: 'AES-256-GCM encrypted API key storage protected by a master password. Your key never leaves your machine.',
+    icon: 'lock',
+  },
+  {
+    title: 'CLI & Local Server',
+    desc: 'Install dependencies, start the server, and manage config from the terminal. Single process serves the full app.',
+    icon: 'cli',
+  },
+];
+
+const stack = [
+  { name: 'LangChain', slug: 'langchain' },
+  { name: 'OpenAI', slug: 'openai' },
+  { name: 'ChromaDB', slug: 'chromadb' },
+  { name: 'React', slug: 'react' },
+  { name: 'Node.js', slug: 'nodedotjs' },
+  { name: 'TypeScript', slug: 'typescript' },
+  { name: 'Vite', slug: 'vite' },
+  { name: 'Tailwind CSS', slug: 'tailwindcss' },
+  { name: 'Express', slug: 'express' },
+  { name: 'LaTeX', slug: 'latex', color: '#008080', svg: 'M12.5 2.5h-9A2.5 2.5 0 0 0 1 5v14a2.5 2.5 0 0 0 2.5 2.5h9A2.5 2.5 0 0 0 15 19V5a2.5 2.5 0 0 0-2.5-2.5zm-1.5 14H4V6h7v10.5z' },
+  { name: 'SQLite', slug: 'sqlite' },
+];
+---
+
+<Layout>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-bg" aria-hidden="true">
+      <div class="hero-glow glow-1"></div>
+      <div class="hero-glow glow-2"></div>
+      <div class="hero-glow glow-3"></div>
+    </div>
+    <div class="container hero-inner">
+      <div class="hero-badge">v1.0.0 &middot; Open Source &middot; MIT</div>
+      <h1 class="hero-title">
+        <span class="gradient-text">AI-Powered</span> Career<br />Toolkit
+      </h1>
+      <p class="hero-desc">
+        Tailor resumes, write cover letters, and generate STAR interview answers — all grounded in your own experience data. Local-first. No cloud sign-up.
+      </p>
+      <div class="hero-cta">
+        <button class="btn btn-primary btn-copy" data-cmd="npx textilecv start">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+          npx textilecv start
+        </button>
+        <a href="https://github.com/MinnKhantZ/CareerAgent#readme" target="_blank" rel="noopener" class="btn btn-outline">Read the Docs</a>
+      </div>
+      <div class="hero-npm">
+        <span class="npm-label">Latest version</span>
+        <span class="npm-version">1.0.0</span>
+        <span class="npm-sep">&middot;</span>
+        <span class="npm-install">npm install -g textilecv</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="section" id="features">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-label">Features</span>
+        <h2 class="section-title">Everything you need for your job search</h2>
+        <p class="section-subtitle">A unified toolkit for resume tailoring, cover letters, and interview prep — powered by RAG over your real experience, all running locally.</p>
+      </div>
+      <div class="features-grid">
+        {features.map((f) => (
+          <article class="feature-card">
+            <div class="feature-icon">
+              {f.icon === 'resume' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>}
+              {f.icon === 'letter' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>}
+              {f.icon === 'star' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>}
+              {f.icon === 'pdf' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 12h4"/><path d="M10 16h2"/></svg>}
+              {f.icon === 'rag' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg>}
+              {f.icon === 'profile' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>}
+              {f.icon === 'lock' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>}
+              {f.icon === 'cli' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>}
+            </div>
+            <h3 class="feature-title">{f.title}</h3>
+            <p class="feature-desc">{f.desc}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Stack -->
+  <section class="section section-alt" id="stack">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-label">Tech Stack</span>
+        <h2 class="section-title">Built on proven tools</h2>
+        <p class="section-subtitle">LangChain for orchestration, ChromaDB for retrieval, OpenAI for generation, and LaTeX for professional PDF output.</p>
+      </div>
+      <div class="stack-grid">
+        {stack.map((item) => (
+          <div class="stack-chip">
+            {item.svg ? (
+              <svg class="stack-icon" viewBox="0 0 24 24" width="18" height="18" fill={item.color} aria-hidden="true"><path d={item.svg} /></svg>
+            ) : (
+              <img class="stack-icon" src={`https://cdn.simpleicons.org/${item.slug}`} alt="" width="18" height="18" loading="lazy" />
+            )}
+            {item.name}
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Start -->
+  <section class="section" id="quickstart">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-label">Quick Start</span>
+        <h2 class="section-title">Up and running in minutes</h2>
+        <p class="section-subtitle">Node.js and an OpenAI API key are all you need to get started. The CLI handles ChromaDB, Python, and LaTeX setup.</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>Install</h3>
+            <p>Install globally or use directly with npx. Run the install command to set up system dependencies.</p>
+            <div class="code-block-wrap">
+              <pre class="code-block"><code>npm install -g textilecv
+textilecv install</code></pre>
+              <button class="copy-btn" data-cmd="npm install -g textilecv&#10;textilecv install" aria-label="Copy command">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>Start</h3>
+            <p>Launch the web interface and open your browser.</p>
+            <div class="code-block-wrap">
+              <pre class="code-block"><code>textilecv start</code></pre>
+              <button class="copy-btn" data-cmd="textilecv start" aria-label="Copy command">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>Configure</h3>
+            <p>Set your master password, add your OpenAI API key, upload experience files, and start tailoring.</p>
+            <div class="code-block-wrap">
+              <pre class="code-block"><code># Opens at http://localhost:3001</code></pre>
+              <button class="copy-btn" data-cmd="http://localhost:3001" aria-label="Copy URL">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why TextileCV -->
+  <section class="section section-alt" id="why">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-label">Why TextileCV</span>
+        <h2 class="section-title">Built for job seekers who value privacy and accuracy</h2>
+      </div>
+      <div class="why-grid">
+        <div class="why-card">
+          <h3><span class="gradient-text">Local-First</span></h3>
+          <p>Everything runs on your machine. Your experience data, API key, and generation history stay on your network.</p>
+        </div>
+        <div class="why-card">
+          <h3><span class="gradient-text">Grounded in Your Experience</span></h3>
+          <p>RAG retrieval pulls from your uploaded files — no hallucinated projects. Every output cites your real background.</p>
+        </div>
+        <div class="why-card">
+          <h3><span class="gradient-text">AI on Your Terms</span></h3>
+          <p>Bring your own OpenAI API key. Choose your model. Your key is encrypted at rest with AES-256-GCM.</p>
+        </div>
+        <div class="why-card">
+          <h3><span class="gradient-text">Open Source</span></h3>
+          <p>MIT licensed. Full source on GitHub. Audit, fork, and contribute freely.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style is:global>
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding: 6rem 0 5rem;
+  }
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .hero-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.3;
+  }
+  .glow-1 {
+    width: 500px; height: 500px;
+    background: var(--primary-400);
+    top: -200px; left: -100px;
+  }
+  .glow-2 {
+    width: 400px; height: 400px;
+    background: var(--brand-blue);
+    top: -100px; right: -80px;
+  }
+  .glow-3 {
+    width: 300px; height: 300px;
+    background: var(--brand-navy);
+    bottom: -100px; left: 40%;
+  }
+  .hero-inner {
+    position: relative;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .hero-badge {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--primary-600);
+    background: var(--primary-50);
+    border: 1px solid var(--primary-200);
+    padding: 0.35rem 1rem;
+    border-radius: 2rem;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.02em;
+  }
+  .hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--surface-900);
+    margin-bottom: 1.25rem;
+    letter-spacing: -0.02em;
+  }
+  .hero-desc {
+    font-size: 1.2rem;
+    color: var(--surface-500);
+    max-width: 640px;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+  }
+  .hero-cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2.5rem;
+  }
+  .btn-copy svg {
+    flex-shrink: 0;
+  }
+  .btn-copy.copied {
+    background: #059669;
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35);
+  }
+  .hero-npm {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--surface-400);
+    background: var(--surface-100);
+    padding: 0.5rem 1.25rem;
+    border-radius: 2rem;
+  }
+  .npm-label {
+    color: var(--surface-500);
+  }
+  .npm-version {
+    font-weight: 700;
+    color: var(--primary-600);
+  }
+  .npm-sep {
+    color: var(--surface-300);
+  }
+  .npm-install {
+    font-family: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+    color: var(--surface-700);
+  }
+
+  .section-header {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 3rem;
+  }
+  .section-alt {
+    background: var(--surface-100);
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+  .feature-card {
+    background: #fff;
+    border: 1px solid var(--surface-200);
+    border-radius: 1rem;
+    padding: 1.75rem;
+    transition: all 0.25s;
+  }
+  .feature-card:hover {
+    border-color: var(--primary-200);
+    box-shadow: 0 8px 30px rgba(79, 70, 229, 0.08);
+    transform: translateY(-2px);
+  }
+  .feature-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    background: var(--primary-50);
+    color: var(--primary-600);
+    margin-bottom: 1rem;
+  }
+  .feature-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--surface-900);
+    margin-bottom: 0.5rem;
+  }
+  .feature-desc {
+    font-size: 0.9rem;
+    color: var(--surface-500);
+    line-height: 1.6;
+  }
+
+  .stack-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .stack-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    background: #fff;
+    border: 1px solid var(--surface-200);
+    border-radius: 2rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--surface-700);
+    transition: all 0.2s;
+  }
+  .stack-chip:hover {
+    border-color: var(--primary-300);
+    color: var(--primary-700);
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.1);
+  }
+  .stack-icon {
+    flex-shrink: 0;
+    border-radius: 2px;
+  }
+
+  .steps {
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .step {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+  }
+  .step-number {
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: var(--brand-gradient);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+  }
+  .step-content h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--surface-900);
+    margin-bottom: 0.3rem;
+  }
+  .step-content p {
+    font-size: 0.9rem;
+    color: var(--surface-500);
+    margin-bottom: 0.75rem;
+  }
+  .code-block-wrap {
+    position: relative;
+  }
+  .code-block {
+    background: var(--surface-900);
+    color: #e2e8f0;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+  .code-block code {
+    font-family: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+  }
+  .copy-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: none;
+    border-radius: 0.35rem;
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.5);
+    cursor: pointer;
+    transition: all 0.2s;
+    opacity: 0;
+  }
+  .code-block-wrap:hover .copy-btn {
+    opacity: 1;
+  }
+  .copy-btn:hover {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+  }
+  .copy-btn.copied {
+    background: #059669;
+    color: #fff;
+    opacity: 1;
+  }
+  .code-block-wrap.copied .code-block {
+    outline: 2px solid #059669;
+  }
+
+  .why-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .why-card {
+    background: #fff;
+    border: 1px solid var(--surface-200);
+    border-radius: 1rem;
+    padding: 2rem;
+    text-align: center;
+  }
+  .why-card h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+  .why-card p {
+    font-size: 0.9rem;
+    color: var(--surface-500);
+    line-height: 1.6;
+  }
+
+  @media (max-width: 768px) {
+    .hero-title {
+      font-size: 2.25rem;
+    }
+    .hero-desc {
+      font-size: 1rem;
+    }
+    .features-grid {
+      grid-template-columns: 1fr;
+    }
+    .why-grid {
+      grid-template-columns: 1fr;
+    }
+    .hero-npm {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .features-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>
+
+<script>
+  function copyText(text: string): Promise<void> {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise(function (resolve, reject) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); resolve(undefined); }
+      catch (err) { reject(err); }
+      document.body.removeChild(ta);
+    });
+  }
+
+  function flashCopied(btn: HTMLElement | null) {
+    if (!btn) return;
+    var isHero = btn.classList.contains('btn-copy');
+    var wrap = btn.closest('.code-block-wrap');
+    btn.classList.add('copied');
+    if (isHero) {
+      var orig = btn.innerHTML;
+      btn.innerHTML = 'Copied!';
+      setTimeout(function () {
+        btn.classList.remove('copied');
+        btn.innerHTML = orig;
+      }, 2000);
+    } else {
+      if (wrap) wrap.classList.add('copied');
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+      setTimeout(function () {
+        btn.classList.remove('copied');
+        if (wrap) wrap.classList.remove('copied');
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>';
+      }, 2000);
+    }
+  }
+
+  var copiedBtns: Record<string, boolean> = {};
+
+  document.addEventListener('click', function (e) {
+    var el = e.target;
+    if (!(el instanceof Element)) return;
+    var btn = el.closest('[data-cmd]') as HTMLElement | null;
+    if (!btn) return;
+    var text = btn.getAttribute('data-cmd');
+    if (!text) return;
+    var key = text + (btn.classList.contains('btn-copy') ? ':hero' : ':step');
+    if (copiedBtns[key]) return;
+    copiedBtns[key] = true;
+    flashCopied(btn);
+    copyText(text);
+    setTimeout(function () { copiedBtns[key] = false; }, 2100);
+  });
+</script>
