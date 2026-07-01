@@ -9,7 +9,7 @@ const program = new Command();
 program
   .name('textilecv')
   .description('TextileCV — AI-powered career toolkit')
-  .version('1.0.0');
+  .version('0.1.0');
 
 program
   .command('install')
