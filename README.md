@@ -12,6 +12,7 @@
 [![OpenAI](https://img.shields.io/badge/OpenAI-GPT--5.4-412991)](https://openai.com/)
 [![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector-FF6B6B)](https://www.trychroma.com/)
 [![LaTeX](https://img.shields.io/badge/LaTeX-PDF-008080)](https://www.latex-project.org/)
+[![npm version](https://img.shields.io/npm/v/textilecv)](https://www.npmjs.com/package/textilecv)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ---
