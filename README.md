@@ -1,11 +1,22 @@
 # TextileCV
 
-AI-powered career toolkit — tailor resumes, write cover letters, and generate STAR interview answers, all from your own experience data. Built with LangChain + OpenAI + ChromaDB + a LaTeX resume compiler.
+> AI-powered career toolkit — tailor resumes, write cover letters, and generate STAR interview answers, all from your own experience data. Built with LangChain + OpenAI + ChromaDB + a LaTeX resume compiler.
 
-![Node](https://img.shields.io/badge/node-%3E%3D20-green)
-![License](https://img.shields.io/badge/license-MIT-blue)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18-61DAFB)](https://reactjs.org/)
+[![Express](https://img.shields.io/badge/Express-4-000000)](https://expressjs.com/)
+[![Vite](https://img.shields.io/badge/Vite-6-646CFF)](https://vitejs.dev/)
+[![Node](https://img.shields.io/badge/Node-%3E%3D20-green)](#)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC)](https://tailwindcss.com/)
+[![LangChain](https://img.shields.io/badge/LangChain-js-1C3C3C)](https://js.langchain.com/)
+[![OpenAI](https://img.shields.io/badge/OpenAI-GPT--5.4-412991)](https://openai.com/)
+[![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector-FF6B6B)](https://www.trychroma.com/)
+[![LaTeX](https://img.shields.io/badge/LaTeX-PDF-008080)](https://www.latex-project.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-## Features
+---
+
+## ✨ Features
 
 - **Resume Tailor** — Paste a job description, get a custom-tailored LaTeX resume matched to your real projects and skills.
 - **Cover Letter Architect** — Narrative-driven cover letters that map your background to the role.
@@ -16,38 +27,29 @@ AI-powered career toolkit — tailor resumes, write cover letters, and generate 
 - **Encrypted Vault** — Your OpenAI API key is encrypted at rest (AES-256-GCM) with a master password and stored locally; it never leaves your machine.
 - **CLI** — Install dependencies, start the server, and manage config from the terminal.
 
-## Architecture
+---
 
-```
-textilecv-monorepo/
-├── packages/
-│   ├── server/        # Express API + LangChain + ChromaDB + LaTeX
-│   ├── client/        # React + Vite + Tailwind SPA
-│   └── cli/           # Commander.js CLI (bundles server+client for production)
-├── scripts/           # Build scripts (copy dist into CLI bundle)
-├── package.json       # npm workspaces root
-└── README.md
-```
+## 🛠️ Tech Stack
 
-- **Development**: run server and client separately with hot-reload.
-- **Production**: CLI bundles server and client dist, serves the SPA from a single Express process.
+| Layer | Technology |
+|---|---|
+| **Runtime** | Node.js, Express, TypeScript (ESM) |
+| **AI** | LangChain.js, OpenAI (`gpt-5.4-mini`, `text-embedding-3-small`) |
+| **Vector Store** | ChromaDB (Python, external) |
+| **LaTeX** | `node-latex` + `pdflatex` (MiKTeX / TeX Live) |
+| **Database** | `sql.js` (SQLite WASM) for logs, preferences, and encrypted vault |
+| **Client** | React 18, Vite, Tailwind CSS |
+| **CLI** | Commander.js, picocolors |
+| **Security** | AES-256-GCM vault (Node `crypto`) for API-key encryption at rest |
 
-## Prerequisites
+---
 
-| Dependency | Purpose | Auto-installed by CLI? |
-|---|---|---|
-| Node.js ≥ 20 | Runtime | No |
-| npm ≥ 10 | Package manager | No |
-| Python 3 | ChromaDB runtime | Yes (`textilecv install`) |
-| ChromaDB | Vector store | Yes (`textilecv install`) |
-| MiKTeX / TeX Live | LaTeX PDF compilation | Yes (`textilecv install`) |
-| OpenAI API Key | Embeddings + chat | No (set via the in-app Settings / encrypted vault) |
-
-## Quick Start
+## 🚀 Quick Start
 
 ```bash
 # 1. Clone and install
-git clone <repo-url> && cd textilecv-monorepo
+git clone https://github.com/MinnKhantZ/textilecv.git
+cd textilecv
 npm install
 
 # 2. Install system dependencies (ChromaDB, Python, LaTeX)
@@ -60,7 +62,40 @@ npx textilecv start
 
 On first launch the browser asks you to **create a master password** (this encrypts your API key at rest). Then set your OpenAI key in the **Settings** tab and upload your experience files in the **Profile & Files** tab.
 
-## Development
+---
+
+## 📋 Prerequisites
+
+| Dependency | Purpose | Auto-installed by CLI? |
+|---|---|---|
+| Node.js ≥ 20 | Runtime | No |
+| npm ≥ 10 | Package manager | No |
+| Python 3 | ChromaDB runtime | Yes (`textilecv install`) |
+| ChromaDB | Vector store | Yes (`textilecv install`) |
+| MiKTeX / TeX Live | LaTeX PDF compilation | Yes (`textilecv install`) |
+| OpenAI API Key | Embeddings + chat | No (set via Settings / encrypted vault) |
+
+---
+
+## 🏗️ Architecture
+
+```
+textilecv/
+├── packages/
+│   ├── server/        # Express API + LangChain + ChromaDB + LaTeX
+│   ├── client/        # React + Vite + Tailwind SPA
+│   └── cli/           # Commander.js CLI (bundles server+client for production)
+├── scripts/           # Build scripts (copy dist into CLI bundle)
+├── package.json       # npm workspaces root
+└── README.md
+```
+
+- **Development**: run server and client separately with hot-reload.
+- **Production**: CLI bundles server and client dist, serves the SPA from a single Express process.
+
+---
+
+## 💻 Development
 
 Two terminals:
 
@@ -99,7 +134,9 @@ PORT=3001                        # API server port
 ALLOWED_ORIGINS=http://localhost:5173  # Comma-separated CORS origins
 ```
 
-## CLI Commands
+---
+
+## 📟 CLI Commands
 
 ```bash
 textilecv install          # Install Python, ChromaDB, LaTeX
@@ -115,7 +152,9 @@ textilecv uninstall --keep-data  # Keep config and data files
 
 Config is stored at `~/.textilecv/config.json`. All user data (SQLite DB, uploads, ChromaDB vector store) lives under `~/.textilecv/`.
 
-## API Endpoints
+---
+
+## 📡 API Endpoints
 
 | Method | Endpoint | Description |
 |---|---|---|
@@ -137,30 +176,22 @@ Config is stored at `~/.textilecv/config.json`. All user data (SQLite DB, upload
 | `GET` | `/logs` | Generation history |
 | `GET` | `/health` | Health check |
 
-## Build
+---
+
+## 📦 Build & Publish
 
 ```bash
 # Full production build (client → server → CLI bundle)
 npm run build
+
+# Publish CLI to npm
+npm run publish:cli
 ```
 
-This compiles the client, copies dist into the CLI package, compiles the server, copies dist into the CLI package, then compiles the CLI. To publish the CLI to npm:
+Build compiles the client, copies dist into the CLI package, compiles the server, copies dist into the CLI package, then compiles the CLI.
 
-```bash
-npm run publish:cli   # builds, then npm publish -w packages/cli
-```
+---
 
-## Tech Stack
+## 📄 License
 
-- **Runtime**: Node.js, Express, TypeScript (ESM)
-- **AI**: LangChain.js, OpenAI (`gpt-5.4-mini`, `text-embedding-3-small`)
-- **Vector Store**: ChromaDB (Python, external)
-- **LaTeX**: `node-latex` + `pdflatex` (MiKTeX / TeX Live)
-- **Database**: `sql.js` (SQLite WASM) for generation logs, preferences, and the encrypted vault
-- **Client**: React 18, Vite, Tailwind CSS
-- **CLI**: Commander.js, picocolors
-- **Security**: AES-256-GCM vault (Node `crypto`) for API-key encryption at rest
-
-## License
-
-MIT
+[MIT](LICENSE)
