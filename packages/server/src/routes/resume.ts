@@ -2,13 +2,13 @@ import { Router, Request, Response } from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
-import { ChatOpenAI } from '@langchain/openai';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { getVectorStore, retrieveContext } from '../lib/vectorStore.js';
 import { resumePrompt, compatibilityPrompt } from '../lib/prompts.js';
 import { saveResumeLatex, getResumeLatex } from '../lib/resumeArtifacts.js';
 import { compileLatexToPdfBuffer } from '../lib/latex.js';
 import { logGeneration, getProfileData } from '../lib/db.js';
+import { getChatModel } from '../lib/llm.js';
 import { profileSchema, emptyProfile, type Profile } from '../lib/profileSchema.js';
 import { buildProfileGroundTruth, OPTIONAL_SECTION_TEMPLATES } from '../lib/sectionTemplates.js';
 import { injectHeader } from '../lib/latexHeaderInjector.js';
@@ -52,11 +52,7 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
     const context = docs.map((d) => d.pageContent).join('\n\n---\n\n');
 
     if (!forceGenerate) {
-      const checkLlm = new ChatOpenAI({
-        modelName: 'gpt-5.4-mini',
-        temperature: 0,
-        openAIApiKey: process.env.OPENAI_API_KEY,
-      });
+      const checkLlm = await getChatModel({ modelName: 'gpt-5.4-mini', temperature: 0 });
       const checkChain = compatibilityPrompt.pipe(checkLlm).pipe(new StringOutputParser());
       const checkRaw = await checkChain.invoke({ context, jobDescription, preferencesSection });
       const check = JSON.parse(checkRaw) as { compatible: boolean; reason?: string };
@@ -66,11 +62,7 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       }
     }
 
-    const llm = new ChatOpenAI({
-      modelName: 'gpt-5.4-mini',
-      temperature: 0.2,
-      openAIApiKey: process.env.OPENAI_API_KEY,
-    });
+    const llm = await getChatModel({ modelName: 'gpt-5.4-mini', temperature: 0.2 });
 
     // Load structured profile (ground truth for header, links, factual fields)
     let profile: Profile = emptyProfile();

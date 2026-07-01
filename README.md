@@ -13,7 +13,8 @@ AI-powered career toolkit — tailor resumes, write cover letters, and generate 
 - **LaTeX PDF Compilation** — Server-side `pdflatex` compilation with fallback template repair.
 - **RAG Pipeline** — Chunked markdown ingested into ChromaDB, retrieved via MMR for diverse, relevant context.
 - **Profile Manager** — Upload files (PDF, DOCX, TXT), view generation history, manage preferences.
-- **CLI** — Install dependencies, initialize data, start the server, and manage config from the terminal.
+- **Encrypted Vault** — Your OpenAI API key is encrypted at rest (AES-256-GCM) with a master password and stored locally; it never leaves your machine.
+- **CLI** — Install dependencies, start the server, and manage config from the terminal.
 
 ## Architecture
 
@@ -40,7 +41,7 @@ textilecv-monorepo/
 | Python 3 | ChromaDB runtime | Yes (`textilecv install`) |
 | ChromaDB | Vector store | Yes (`textilecv install`) |
 | MiKTeX / TeX Live | LaTeX PDF compilation | Yes (`textilecv install`) |
-| OpenAI API Key | Embeddings + chat | No (set in `.env`) |
+| OpenAI API Key | Embeddings + chat | No (set via the in-app Settings / encrypted vault) |
 
 ## Quick Start
 
@@ -52,16 +53,12 @@ npm install
 # 2. Install system dependencies (ChromaDB, Python, LaTeX)
 npx textilecv install
 
-# 3. Configure your OpenAI key
-cp packages/server/.env.example packages/server/.env   # then edit .env
-
-# 4. Initialize with sample data
-npx textilecv init
-
-# 5. Start the web interface
+# 3. Start the web interface
 npx textilecv start
 # → opens http://localhost:3001
 ```
+
+On first launch the browser asks you to **create a master password** (this encrypts your API key at rest). Then set your OpenAI key in the **Settings** tab and upload your experience files in the **Profile & Files** tab.
 
 ## Development
 
@@ -75,29 +72,28 @@ npm run dev:server
 npm run dev:client
 ```
 
-The Vite dev server proxies `/generate-*`, `/uploads`, `/logs`, and `/health` to `localhost:3001`.
+The Vite dev server proxies `/generate-*`, `/uploads`, `/logs`, `/profile`, `/vault`, `/settings`, and `/health` to `localhost:3001`.
 
 ### Data Files
 
-Place your experience data in `packages/server/data/`:
+Place your experience data in `packages/server/data/` (in development) — in production this lives at `~/.textilecv/data/`:
 
 | File | Purpose |
 |---|---|
 | `master_experience.md` | Your projects, skills, work history (markdown, split on `#` headers) |
 | `about.md` | Optional personal summary, preferences, career goals |
 
-After editing, re-ingest into ChromaDB:
+Uploading files through the web interface automatically re-ingests them into ChromaDB — there is no separate manual ingestion step.
 
-```bash
-cd packages/server && npm run ingest
-```
+### API Key & Vault
 
-### Environment Variables
+The OpenAI API key is stored encrypted (AES-256-GCM) inside the SQLite database and unlocked with a master password set on first launch. Set and manage it from the **Settings** tab in the web UI (works in both dev and production).
 
-`packages/server/.env`:
+### Environment Variables (optional)
+
+`packages/server/.env` (dev) or `~/.textilecv/.env` (production) — all optional:
 
 ```env
-OPENAI_API_KEY=sk-...          # Required
 CHROMA_URL=http://localhost:8000  # ChromaDB endpoint
 PORT=3001                        # API server port
 ALLOWED_ORIGINS=http://localhost:5173  # Comma-separated CORS origins
@@ -107,7 +103,6 @@ ALLOWED_ORIGINS=http://localhost:5173  # Comma-separated CORS origins
 
 ```bash
 textilecv install          # Install Python, ChromaDB, LaTeX
-textilecv init             # Copy sample data → data/, run ingestion
 textilecv start            # Start ChromaDB + Express server + SPA
 textilecv start -p 8080    # Override port for this session
 textilecv config --list    # Show current config
@@ -118,19 +113,27 @@ textilecv uninstall -y     # Skip prompts, uninstall everything
 textilecv uninstall --keep-data  # Keep config and data files
 ```
 
-Config is stored at `~/.textilecv/config.json`.
+Config is stored at `~/.textilecv/config.json`. All user data (SQLite DB, uploads, ChromaDB vector store) lives under `~/.textilecv/`.
 
 ## API Endpoints
 
 | Method | Endpoint | Description |
 |---|---|---|
+| `GET` | `/vault/status` | Vault setup/unlock state (public) |
+| `POST` | `/vault/setup` | Create master password (first launch) |
+| `POST` | `/vault/unlock` | Unlock the vault |
+| `POST` | `/vault/lock` | Lock the vault |
+| `POST` | `/vault/change-password` | Change master password |
+| `GET` | `/settings` | AI settings (key redacted) |
+| `PATCH` | `/settings` | Update AI provider/model/base URL/key |
+| `POST` | `/settings/ai/test` | Test the configured API key |
 | `POST` | `/generate-resume` | Tailor resume to a job description |
 | `GET` | `/generate-resume/pdf/:id` | Download compiled PDF |
-| `GET` | `/generate-resume/latex/:id` | Download raw LaTeX |
+| `GET` | `/generate-resume/source/:id` | Download raw LaTeX |
 | `POST` | `/generate-cover-letter` | Generate cover letter |
 | `POST` | `/generate-star-answers` | Generate STAR answers for questions |
-| `POST` | `/uploads` | Upload files (PDF, DOCX, TXT) |
-| `GET` | `/uploads` | List uploaded files |
+| `POST` | `/uploads/:fileType` | Upload a file (PDF, DOCX, TXT) |
+| `GET` | `/uploads/status` | Upload + ingest status |
 | `GET` | `/logs` | Generation history |
 | `GET` | `/health` | Health check |
 
@@ -141,7 +144,11 @@ Config is stored at `~/.textilecv/config.json`.
 npm run build
 ```
 
-This compiles the client, copies dist into the CLI package, compiles the server, copies dist into the CLI package, then compiles the CLI.
+This compiles the client, copies dist into the CLI package, compiles the server, copies dist into the CLI package, then compiles the CLI. To publish the CLI to npm:
+
+```bash
+npm run publish:cli   # builds, then npm publish -w packages/cli
+```
 
 ## Tech Stack
 
@@ -149,9 +156,10 @@ This compiles the client, copies dist into the CLI package, compiles the server,
 - **AI**: LangChain.js, OpenAI (`gpt-5.4-mini`, `text-embedding-3-small`)
 - **Vector Store**: ChromaDB (Python, external)
 - **LaTeX**: `node-latex` + `pdflatex` (MiKTeX / TeX Live)
-- **Database**: `sql.js` (SQLite WASM) for generation logs and preferences
+- **Database**: `sql.js` (SQLite WASM) for generation logs, preferences, and the encrypted vault
 - **Client**: React 18, Vite, Tailwind CSS
 - **CLI**: Commander.js, picocolors
+- **Security**: AES-256-GCM vault (Node `crypto`) for API-key encryption at rest
 
 ## License
 

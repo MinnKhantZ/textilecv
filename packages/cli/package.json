@@ -8,13 +8,22 @@
     "textilecv": "bin/textilecv.js"
   },
   "files": [
-    "bin/",
+    "bin/textilecv.js",
     "dist/",
     "client-dist/",
-    "server-dist/"
+    "server-dist/",
+    "samples/",
+    "README.md"
   ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "prepublishOnly": "node ../../scripts/ensure-cli-built.js"
   },
   "dependencies": {
     "@langchain/community": "^0.3.0",

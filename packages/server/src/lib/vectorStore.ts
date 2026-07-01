@@ -1,14 +1,11 @@
 import { Chroma } from '@langchain/community/vectorstores/chroma';
-import { OpenAIEmbeddings } from '@langchain/openai';
 import { Document } from '@langchain/core/documents';
+import { getEmbeddings } from './llm.js';
 
 const COLLECTION_NAME = 'textilecv';
 
 export async function getVectorStore(): Promise<Chroma> {
-  const embeddings = new OpenAIEmbeddings({
-    modelName: 'text-embedding-3-small',
-    openAIApiKey: process.env.OPENAI_API_KEY,
-  });
+  const embeddings = await getEmbeddings();
 
   try {
     return await Chroma.fromExistingCollection(embeddings, {
@@ -18,7 +15,7 @@ export async function getVectorStore(): Promise<Chroma> {
   } catch {
     throw new Error(
       `ChromaDB collection "${COLLECTION_NAME}" not found. ` +
-        'Please add your data files to backend/data/ and run: npm run ingest'
+        'Please upload your experience and about files via the web interface.'
     );
   }
 }

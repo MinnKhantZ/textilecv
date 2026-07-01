@@ -80,22 +80,11 @@ function prompt(question: string): Promise<boolean> {
 // ── Paths ──────────────────────────────────────────────────────────────────
 
 const TEXTILECV_CONFIG_DIR = path.join(os.homedir(), '.textilecv');
-const SERVER_DATA_DIR = path.resolve(import.meta.dirname ?? __dirname, '../../../server/data');
 
 function removeDir(dirPath: string): boolean {
   if (!fs.existsSync(dirPath)) return false;
   try {
     fs.rmSync(dirPath, { recursive: true, force: true });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function removeFile(filePath: string): boolean {
-  if (!fs.existsSync(filePath)) return false;
-  try {
-    fs.unlinkSync(filePath);
     return true;
   } catch {
     return false;
@@ -183,29 +172,11 @@ export async function uninstall(options: UninstallOptions = {}): Promise<void> {
   } else {
     header('Deleting TextileCV data');
 
-    let deletedAny = false;
-
     if (fs.existsSync(TEXTILECV_CONFIG_DIR)) {
       removeDir(TEXTILECV_CONFIG_DIR);
       success(`Deleted ${TEXTILECV_CONFIG_DIR}`);
-      deletedAny = true;
-    }
-
-    if (fs.existsSync(SERVER_DATA_DIR)) {
-      // Only delete user data files, not the samples directory
-      const files = fs.readdirSync(SERVER_DATA_DIR);
-      for (const file of files) {
-        const filePath = path.join(SERVER_DATA_DIR, file);
-        const stat = fs.statSync(filePath);
-        if (stat.isFile()) {
-          removeFile(filePath);
-          success(`Deleted data/${file}`);
-          deletedAny = true;
-        }
-      }
-    }
-
-    if (!deletedAny) {
+      info('  (includes config.json, .env, data/, and chroma/ vector store)');
+    } else {
       info('No data files to delete');
     }
   }

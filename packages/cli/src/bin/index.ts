@@ -1,5 +1,4 @@
 import { Command } from 'commander';
-import { init } from '../commands/init.js';
 import { studio } from '../commands/start.js';
 import { config } from '../commands/config.js';
 import { install } from '../commands/install.js';
@@ -32,18 +31,6 @@ program
   .action(async (opts) => {
     try {
       await uninstall(opts);
-    } catch (err) {
-      console.error(err);
-      process.exit(1);
-    }
-  });
-
-program
-  .command('init')
-  .description('Initialize TextileCV with sample data and ChromaDB ingestion')
-  .action(async () => {
-    try {
-      await init();
     } catch (err) {
       console.error(err);
       process.exit(1);

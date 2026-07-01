@@ -9,6 +9,9 @@ import starRouter from './routes/starAnswers.js';
 import uploadsRouter from './routes/uploads.js';
 import logsRouter from './routes/logs.js';
 import profileRouter from './routes/profile.js';
+import vaultRouter from './routes/vault.js';
+import settingsRouter from './routes/settings.js';
+import { requireVaultUnlocked } from './middleware/requireVaultUnlocked.js';
 
 export interface ServerConfig {
   allowedOrigins?: string[];
@@ -34,12 +37,20 @@ export function createApp(config: ServerConfig = {}): express.Application {
 
   app.use(express.json({ limit: '10mb' }));
 
-  app.use('/generate-resume', resumeRouter);
-  app.use('/generate-cover-letter', coverLetterRouter);
-  app.use('/generate-star-answers', starRouter);
-  app.use('/uploads', uploadsRouter);
-  app.use('/logs', logsRouter);
-  app.use('/profile', profileRouter);
+  // Vault routes are public (must work while the vault is locked/unset).
+  app.use('/vault', vaultRouter);
+
+  // Settings routes require the vault to be unlocked (key is encrypted at rest).
+  app.use('/settings', requireVaultUnlocked, settingsRouter);
+
+  // All generation / data routes require the vault to be unlocked so the
+  // decrypted API key is available in memory.
+  app.use('/generate-resume', requireVaultUnlocked, resumeRouter);
+  app.use('/generate-cover-letter', requireVaultUnlocked, coverLetterRouter);
+  app.use('/generate-star-answers', requireVaultUnlocked, starRouter);
+  app.use('/uploads', requireVaultUnlocked, uploadsRouter);
+  app.use('/logs', requireVaultUnlocked, logsRouter);
+  app.use('/profile', requireVaultUnlocked, profileRouter);
 
   app.get('/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });

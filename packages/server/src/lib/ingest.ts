@@ -1,18 +1,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { fileURLToPath, pathToFileURL } from 'url';
-import dotenv from 'dotenv';
-
-dotenv.config();
-
 import { Chroma } from '@langchain/community/vectorstores/chroma';
-import { OpenAIEmbeddings } from '@langchain/openai';
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 import { Document } from '@langchain/core/documents';
+import { getDataDir } from './paths.js';
+import { getEmbeddings } from './llm.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-const DATA_DIR = path.join(__dirname, '../data');
+const DATA_DIR = getDataDir();
 const COLLECTION_NAME = 'textilecv';
 
 /**
@@ -100,19 +94,15 @@ async function splitOversizedChunks(docs: Document[]): Promise<Document[]> {
 }
 
 /**
- * Re-ingests all data files from backend/data/ into ChromaDB.
+ * Re-ingests all data files from the data directory into ChromaDB.
  * Safe to call multiple times — always rebuilds the collection from scratch by
  * deleting the existing collection before re-indexing all documents.
+ *
+ * Invoked automatically after every upload (see routes/uploads.ts); there is no
+ * standalone CLI entry point.
  */
 export async function runIngest(): Promise<IngestResult> {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY is not set in the environment.');
-  }
-
-  const embeddings = new OpenAIEmbeddings({
-    modelName: 'text-embedding-3-small',
-    openAIApiKey: process.env.OPENAI_API_KEY,
-  });
+  const embeddings = await getEmbeddings();
 
   const chromaUrl = process.env.CHROMA_URL ?? 'http://localhost:8000';
   const allDocs: Document[] = [];
@@ -145,7 +135,7 @@ export async function runIngest(): Promise<IngestResult> {
   }
 
   if (allDocs.length === 0) {
-    return { success: false, docCount: 0, sources: [], error: 'No data files found in backend/data/' };
+    return { success: false, docCount: 0, sources: [], error: 'No data files found. Upload your experience and about files first.' };
   }
 
   // Delete the existing collection so re-ingest truly rebuilds from scratch
@@ -166,24 +156,3 @@ export async function runIngest(): Promise<IngestResult> {
 
   return { success: true, docCount: allDocs.length, sources };
 }
-
-// ── CLI entry point ───────────────────────────────────────────────────────────
-const isMainModule = import.meta.url === pathToFileURL(process.argv[1]).href;
-
-if (isMainModule) {
-  runIngest()
-    .then((result) => {
-      if (result.success) {
-        console.log(`Ingested ${result.docCount} documents from: ${result.sources.join(', ')}`);
-        console.log('Ingestion complete! You can now start the backend server.');
-      } else {
-        console.error('Ingestion failed:', result.error);
-        process.exit(1);
-      }
-    })
-    .catch((err: unknown) => {
-      console.error('Ingestion failed:', err);
-      process.exit(1);
-    });
-}
-

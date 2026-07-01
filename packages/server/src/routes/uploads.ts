@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { recordUpload, getAllUploadsStatus, hashFile, saveProfile, getPreference } from '../lib/db.js';
+import { getDataDir } from '../lib/paths.js';
 import { normalizeToText, isSupportedExtension, SUPPORTED_EXTENSIONS } from '../lib/parsers.js';
 // runIngest is loaded dynamically so a heavy-dependency import failure can never
 // prevent this router from being registered (which would cause 404 on all uploads).
@@ -12,7 +13,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const router = Router();
 
-const DATA_DIR = path.join(__dirname, '../../data');
+const DATA_DIR = getDataDir();
 const SAMPLES_DIR = path.join(__dirname, '../../samples');
 
 const ALLOWED_TYPES: Record<string, { extensions: readonly string[]; storedName: string }> = {
@@ -58,7 +59,7 @@ function triggerIngest(): void {
   ingestState = { ...ingestState, status: 'running', error: null };
 
   const run = async () => {
-      const { runIngest } = await import('../ingest.js');
+      const { runIngest } = await import('../lib/ingest.js');
     return runIngest();
   };
 

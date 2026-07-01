@@ -1,6 +1,7 @@
 import { execSync, spawn } from 'child_process';
-import { existsSync } from 'fs';
+import { existsSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
+import { homedir } from 'os';
 import pc from 'picocolors';
 import { detectOs, run, runQuiet, refreshWindowsPath, findChromaPath } from '../chroma.js';
 
@@ -250,8 +251,11 @@ export async function install(): Promise<void> {
       info('Starting ChromaDB server in background...');
       const chromaPath = findChromaPath();
       if (chromaPath) {
+        // Persist the vector store under the user's config dir (~/.textilecv/chroma)
+        const chromaDataDir = join(homedir(), '.textilecv', 'chroma');
+        mkdirSync(chromaDataDir, { recursive: true });
         try {
-          const child = spawn(chromaPath, ['run', '--port', '8000'], {
+          const child = spawn(chromaPath, ['run', '--port', '8000', '--path', chromaDataDir], {
             detached: true,
             stdio: 'ignore',
             ...(process.platform === 'win32' ? { shell: true } : {}),
@@ -259,9 +263,9 @@ export async function install(): Promise<void> {
           child.unref();
         } catch {
           if (os === 'windows') {
-            runQuiet(`start "" "${chromaPath}" run --port 8000`);
+            runQuiet(`start "" "${chromaPath}" run --port 8000 --path "${chromaDataDir}"`);
           } else {
-            runQuiet('nohup chroma run --host 0.0.0.0 --port 8000 > /dev/null 2>&1 &');
+            runQuiet(`nohup chroma run --host 0.0.0.0 --port 8000 --path "${chromaDataDir}" > /dev/null 2>&1 &`);
           }
         }
         await new Promise((r) => setTimeout(r, 5000));
@@ -290,8 +294,8 @@ export async function install(): Promise<void> {
   if (allOk) {
     console.log(pc.bold(pc.green('\n  All dependencies are ready!')));
     console.log(pc.cyan('  Next steps:'));
-    info('Run "textilecv init" to set up sample data');
-    info('Run "textilecv start" to launch the web interface\n');
+    info('Run "textilecv start" to launch the web interface');
+    info('Then set your OpenAI API key in Settings and upload your files.\n');
   } else {
     console.log(pc.yellow('\n  Some dependencies failed to install.'));
     console.log(pc.yellow('  Install them manually and re-run: textilecv install\n'));

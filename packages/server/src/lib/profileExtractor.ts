@@ -1,13 +1,12 @@
-import { ChatOpenAI } from '@langchain/openai';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import * as fs from 'fs';
 import * as path from 'path';
-import { fileURLToPath } from 'url';
 import { profileSchema, emptyProfile, type Profile, type ProfileLink, type ProfileType } from './profileSchema.js';
+import { getDataDir } from './paths.js';
+import { getChatModel } from './llm.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = path.join(__dirname, '../../data');
+const DATA_DIR = getDataDir();
 
 // ── Pass 1: Deterministic regex extraction (free, instant, format-agnostic) ──
 
@@ -136,11 +135,7 @@ export async function extractProfile(existingProfileType?: ProfileType): Promise
   // Pass 2: LLM structured output
   let profile: Profile;
   try {
-    const llm = new ChatOpenAI({
-      modelName: 'gpt-5.4-mini',
-      temperature: 0,
-      openAIApiKey: process.env.OPENAI_API_KEY,
-    });
+    const llm = await getChatModel({ modelName: 'gpt-5.4-mini', temperature: 0 });
 
     // Try withStructuredOutput first (uses function calling / JSON mode)
     try {

@@ -1,9 +1,10 @@
 import { Router, Request, Response } from 'express';
-import { ChatOpenAI } from '@langchain/openai';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { Document } from '@langchain/core/documents';
-import { getVectorStore } from '../lib/vectorStore.js';import { starPrompt, loadAboutMe } from '../lib/prompts.js';
+import { getVectorStore } from '../lib/vectorStore.js';
+import { starPrompt, loadAboutMe } from '../lib/prompts.js';
 import { logGeneration } from '../lib/db.js';
+import { getChatModel } from '../lib/llm.js';
 
 const router = Router();
 
@@ -49,11 +50,7 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       .map((q, i) => `Question ${i + 1}: ${q}`)
       .join('\n\n');
 
-    const llm = new ChatOpenAI({
-      modelName: 'gpt-5.4-mini',
-      temperature: 0.4,
-      openAIApiKey: process.env.OPENAI_API_KEY,
-    });
+    const llm = await getChatModel({ modelName: 'gpt-5.4-mini', temperature: 0.4 });
 
     const aboutMe = loadAboutMe();
     const aboutMeSection = aboutMe

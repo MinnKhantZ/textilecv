@@ -1,11 +1,9 @@
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import * as fs from 'fs';
 import * as path from 'path';
-import { fileURLToPath } from 'url';
+import { getDataDir } from './paths.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-const ABOUT_PATH = path.join(__dirname, '../../data/about.md');
+const ABOUT_PATH = path.join(getDataDir(), 'about.md');
 
 export function loadAboutMe(): string {
   try {
@@ -67,7 +65,7 @@ PROJECTS — PERSONAL/SIDE PROJECTS ONLY, TIGHTLY CURATED:
 18. The Projects section is for PERSONAL/SIDE projects the candidate built on their own. Company projects already described in Experience should NOT be duplicated here.
 19. Include at most 3 projects — the 3 MOST JD-relevant ones. Do NOT include 4+ projects.
 20. For each project, link the project name with a URL using this PRIORITY ORDER:
-    a. FIRST: the project's "Project link" or live demo URL from the STRUCTURED PROFILE or context (e.g. a portfolio page like minkhantzaw.dev/\#projects).
+     a. FIRST: the project's "Project link" or live demo URL from the STRUCTURED PROFILE or context (e.g. a portfolio page like minkhantzaw.dev/#projects).
     b. SECOND: if no project/demo link exists, use the project's GitHub repo URL (e.g. "Source Code at github.com/...") from the context.
     c. THIRD: if no link exists at all, use a plain project title without \\href.
     Be CONSISTENT — if multiple projects share the same portfolio/demo link, use that link for ALL of them, not GitHub for some and portfolio for others. Do NOT put project URLs in the header.

@@ -1,6 +1,7 @@
 import { execSync, spawn } from 'child_process';
-import { existsSync } from 'fs';
+import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
+import os from 'os';
 import pc from 'picocolors';
 
 type OsType = 'windows' | 'macos' | 'linux';
@@ -144,8 +145,13 @@ export async function ensureChromaRunning(port = 8000): Promise<boolean> {
 
   console.log(pc.yellow('  ChromaDB is not running. Starting it in the background...'));
 
+  // Persist the vector store under the user's config dir (~/.textilecv/chroma)
+  // so it survives package upgrades and never leaks into the npm bundle.
+  const chromaDataDir = join(os.homedir(), '.textilecv', 'chroma');
+  mkdirSync(chromaDataDir, { recursive: true });
+
   try {
-    const child = spawn(chromaPath, ['run', '--port', String(port)], {
+    const child = spawn(chromaPath, ['run', '--port', String(port), '--path', chromaDataDir], {
       detached: true,
       stdio: 'ignore',
       ...(process.platform === 'win32' ? { shell: true } : {}),
@@ -154,9 +160,9 @@ export async function ensureChromaRunning(port = 8000): Promise<boolean> {
   } catch {
     // fallback to shell command
     if (process.platform === 'win32') {
-      runQuiet(`start "" "${chromaPath}" run --port ${port}`);
+      runQuiet(`start "" "${chromaPath}" run --port ${port} --path "${chromaDataDir}"`);
     } else {
-      runQuiet(`nohup ${chromaPath} run --host 0.0.0.0 --port ${port} > /dev/null 2>&1 &`);
+      runQuiet(`nohup ${chromaPath} run --host 0.0.0.0 --port ${port} --path "${chromaDataDir}" > /dev/null 2>&1 &`);
     }
   }
 

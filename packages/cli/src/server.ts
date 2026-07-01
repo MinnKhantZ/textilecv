@@ -26,7 +26,9 @@ export async function startStudio(config: StudioConfig): Promise<void> {
     process.exit(1);
   }
 
-  // Load .env from ~/.textilecv/ before any server module reads env vars
+  // Load optional env overrides (CHROMA_URL, PORT) from ~/.textilecv/.env.
+  // The OpenAI API key is no longer read from env — it is stored encrypted in
+  // the vault (set via the web Settings UI) and decrypted at request time.
   const envPath = path.join(CONFIG_DIR, '.env');
   if (fs.existsSync(envPath)) {
     dotenv.config({ path: envPath });

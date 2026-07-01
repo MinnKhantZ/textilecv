@@ -2,11 +2,10 @@ import initSqlJs, { Database } from 'sql.js';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
-import { fileURLToPath } from 'url';
+import { getDbPath } from './paths.js';
+import * as vaultService from './vaultService.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-const DB_PATH = path.join(__dirname, '../../data/textilecv.db');
+const DB_PATH = getDbPath();
 
 let _db: Database | null = null;
 
@@ -61,6 +60,13 @@ function applySchema(db: Database): void {
       id INTEGER PRIMARY KEY CHECK (id = 1),
       data TEXT NOT NULL,
       updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS vault (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      salt TEXT NOT NULL,
+      verifier TEXT NOT NULL,
+      created_at TEXT NOT NULL
     );
   `);
 }
@@ -282,4 +288,118 @@ export async function getProfileData(): Promise<string | null> {
 
 export function hashFile(buffer: Buffer): string {
   return crypto.createHash('sha256').update(buffer).digest('hex');
+}
+
+// ── Vault & AI settings ──────────────────────────────────────────────────────
+
+export async function deletePreference(key: string): Promise<void> {
+  const db = await openDb();
+  db.run('DELETE FROM preferences WHERE key = ?', [key]);
+  persist(db);
+}
+
+export async function isVaultSetup(): Promise<boolean> {
+  const db = await openDb();
+  const result = db.exec('SELECT id FROM vault WHERE id = 1');
+  return !!result[0]?.values[0];
+}
+
+export async function getVaultMeta(): Promise<{ salt: string; verifier: string } | null> {
+  const db = await openDb();
+  const result = db.exec('SELECT salt, verifier FROM vault WHERE id = 1');
+  if (!result[0]?.values[0]) return null;
+  return { salt: result[0].values[0][0] as string, verifier: result[0].values[0][1] as string };
+}
+
+export async function setupVault(password: string): Promise<void> {
+  const salt = vaultService.generateSalt();
+  const { verifier } = vaultService.setupVaultPassword(password, salt);
+  const db = await openDb();
+  const now = new Date().toISOString();
+  db.run(
+    'INSERT OR REPLACE INTO vault (id, salt, verifier, created_at) VALUES (1, ?, ?, ?)',
+    [salt, verifier, now]
+  );
+  persist(db);
+}
+
+export async function getDecryptedApiKey(): Promise<string | null> {
+  const enc = await getPreference('ai_api_key_enc');
+  if (!enc) return null;
+  try {
+    return vaultService.decrypt(enc);
+  } catch {
+    return null;
+  }
+}
+
+export interface PublicAiSettings {
+  provider: string;
+  model: string;
+  baseUrl: string;
+  hasApiKey: boolean;
+}
+
+export async function getPublicAiSettings(): Promise<PublicAiSettings> {
+  const provider = (await getPreference('ai_provider')) || 'openai';
+  const model = (await getPreference('ai_model')) || '';
+  const baseUrl = (await getPreference('ai_base_url')) || '';
+  const enc = await getPreference('ai_api_key_enc');
+  return { provider, model, baseUrl, hasApiKey: !!enc };
+}
+
+export async function saveAiSettings(patch: {
+  provider?: string;
+  model?: string;
+  baseUrl?: string;
+  apiKey?: string | null;
+}): Promise<void> {
+  if (patch.provider !== undefined) await setPreference('ai_provider', patch.provider);
+  if (patch.model !== undefined) await setPreference('ai_model', patch.model);
+  if (patch.baseUrl !== undefined) await setPreference('ai_base_url', patch.baseUrl);
+  if (patch.apiKey !== undefined) {
+    if (patch.apiKey && patch.apiKey.length > 0) {
+      await setPreference('ai_api_key_enc', vaultService.encrypt(patch.apiKey));
+    } else {
+      await deletePreference('ai_api_key_enc');
+    }
+  }
+}
+
+export async function changeMasterPassword(
+  currentPassword: string,
+  newPassword: string
+): Promise<boolean> {
+  const meta = await getVaultMeta();
+  if (!meta) return false;
+  if (!vaultService.unlockWithPassword(currentPassword, meta.salt, meta.verifier)) return false;
+
+  // Decrypt the existing API key under the old key before rekeying.
+  const existingKey = await getDecryptedApiKey();
+
+  const newSalt = vaultService.generateSalt();
+  const { verifier: newVerifier } = vaultService.setupVaultPassword(newPassword, newSalt);
+
+  // Re-encrypt the API key under the new key.
+  let newEnc: string | null = null;
+  if (existingKey) {
+    newEnc = vaultService.encrypt(existingKey);
+  }
+
+  const db = await openDb();
+  const now = new Date().toISOString();
+  db.run('UPDATE vault SET salt = ?, verifier = ?, created_at = ? WHERE id = 1', [
+    newSalt,
+    newVerifier,
+    now,
+  ]);
+  if (newEnc) {
+    db.run(
+      `INSERT INTO preferences (key, value, updated_at) VALUES ('ai_api_key_enc', ?, ?)
+       ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`,
+      [newEnc, now]
+    );
+  }
+  persist(db);
+  return true;
 }

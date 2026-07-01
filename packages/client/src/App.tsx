@@ -3,9 +3,10 @@ import ResumeTailor from './components/ResumeTailor'
 import CoverLetterArchitect from './components/CoverLetterArchitect'
 import StarGenerator from './components/StarGenerator'
 import ProfileManager from './components/ProfileManager'
+import Settings from './components/Settings'
 import OnboardingModal from './components/OnboardingModal'
 
-type Tab = 'resume' | 'cover' | 'star' | 'profile'
+type Tab = 'resume' | 'cover' | 'star' | 'profile' | 'settings'
 
 const TABS: { id: Tab; label: string; description: string; color: string }[] = [
   {
@@ -32,6 +33,12 @@ const TABS: { id: Tab; label: string; description: string; color: string }[] = [
     description: 'Upload data · view history',
     color: 'teal',
   },
+  {
+    id: 'settings',
+    label: 'Settings',
+    description: 'API key · vault security',
+    color: 'slate',
+  },
 ]
 
 const ACTIVE_CLASSES: Record<Tab, string> = {
@@ -39,6 +46,7 @@ const ACTIVE_CLASSES: Record<Tab, string> = {
   cover: 'text-violet-600 border-b-2 border-violet-600 bg-violet-50',
   star: 'text-amber-600 border-b-2 border-amber-600 bg-amber-50',
   profile: 'text-teal-600 border-b-2 border-teal-600 bg-teal-50',
+  settings: 'text-slate-700 border-b-2 border-slate-700 bg-slate-100',
 }
 
 export default function App() {
@@ -117,6 +125,7 @@ export default function App() {
         {activeTab === 'cover' && <CoverLetterArchitect />}
         {activeTab === 'star' && <StarGenerator />}
         {activeTab === 'profile' && <ProfileManager />}
+        {activeTab === 'settings' && <Settings />}
       </main>
 
       {/* ── Footer ──────────────────────────────────────────────────────────── */}
