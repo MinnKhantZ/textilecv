@@ -3,7 +3,19 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    background: #f5f7ff;
+  }
+
   body {
-    @apply antialiased bg-slate-50 text-slate-900;
+    @apply antialiased text-slate-900;
+    background:
+      radial-gradient(circle at top, rgba(117, 144, 255, 0.18), transparent 32%),
+      linear-gradient(180deg, #f5f7ff 0%, #edf2ff 44%, #f8fafc 100%);
+    min-height: 100vh;
   }
 }

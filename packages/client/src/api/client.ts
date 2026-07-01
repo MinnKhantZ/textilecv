@@ -24,10 +24,14 @@ export function onVaultLocked(cb: () => void): () => void {
   }
 }
 
+function emitVaultLocked(): void {
+  vaultLockHandlers.forEach((cb) => cb())
+}
+
 async function apiFetch(input: string, init?: RequestInit): Promise<Response> {
   const res = await fetch(input, init)
   if (res.status === 423) {
-    vaultLockHandlers.forEach((cb) => cb())
+    emitVaultLocked()
   }
   return res
 }
@@ -280,7 +284,10 @@ export const unlockVault = (password: string) =>
   post<{ success: boolean; isUnlocked: boolean }>('/vault/unlock', { password })
 
 export const lockVault = () =>
-  post<{ success: boolean; isUnlocked: boolean }>('/vault/lock', {})
+  post<{ success: boolean; isUnlocked: boolean }>('/vault/lock', {}).then((result) => {
+    emitVaultLocked()
+    return result
+  })
 
 export const changeVaultPassword = (currentPassword: string, newPassword: string) =>
   post<{ success: boolean }>('/vault/change-password', { currentPassword, newPassword })

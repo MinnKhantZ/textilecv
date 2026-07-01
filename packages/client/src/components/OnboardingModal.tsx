@@ -1,14 +1,15 @@
 import { useState } from 'react'
+import { BookOpen, ChartColumn, Cog, GraduationCap, Paintbrush, Sparkles, Wrench } from 'lucide-react'
 import { setProfileType, type ProfileType } from '../api/client'
 
-const PROFILE_TYPES: { id: ProfileType; label: string; icon: string; desc: string }[] = [
-  { id: 'student', label: 'Student', icon: '🎓', desc: 'Recent grad or current student' },
-  { id: 'engineering', label: 'Engineering', icon: '⚙️', desc: 'Software, mechanical, electrical' },
-  { id: 'design', label: 'Design', icon: '🎨', desc: 'UI/UX, graphic, product design' },
-  { id: 'business', label: 'Business', icon: '📊', desc: 'Management, finance, marketing' },
-  { id: 'academic', label: 'Academic', icon: '📚', desc: 'Research, teaching, postdoc' },
-  { id: 'trades', label: 'Trades', icon: '🔧', desc: 'Licensed trades, hands-on work' },
-  { id: 'other', label: 'Other', icon: '✨', desc: 'Something else entirely' },
+const PROFILE_TYPES: { id: ProfileType; label: string; icon: typeof GraduationCap; desc: string }[] = [
+  { id: 'student', label: 'Student', icon: GraduationCap, desc: 'Recent grad or current student' },
+  { id: 'engineering', label: 'Engineering', icon: Cog, desc: 'Software, mechanical, electrical' },
+  { id: 'design', label: 'Design', icon: Paintbrush, desc: 'UI/UX, graphic, product design' },
+  { id: 'business', label: 'Business', icon: ChartColumn, desc: 'Management, finance, marketing' },
+  { id: 'academic', label: 'Academic', icon: BookOpen, desc: 'Research, teaching, postdoc' },
+  { id: 'trades', label: 'Trades', icon: Wrench, desc: 'Licensed trades, hands-on work' },
+  { id: 'other', label: 'Other', icon: Sparkles, desc: 'Something else entirely' },
 ]
 
 interface Props {
@@ -23,7 +24,7 @@ export default function OnboardingModal({ onSelect }: Props) {
     try {
       await setProfileType(type)
     } catch {
-      // ignore — type can be set later in the profile panel
+      // ignore - type can be set later in the profile panel
     } finally {
       localStorage.setItem('textilecv_onboarded', '1')
       onSelect()
@@ -37,9 +38,9 @@ export default function OnboardingModal({ onSelect }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 p-8">
-        <h2 className="text-xl font-bold text-slate-800 text-center">What best describes you?</h2>
-        <p className="text-sm text-slate-500 text-center mt-2 mb-6">
+      <div className="mx-4 w-full max-w-lg rounded-2xl bg-white p-8 shadow-2xl">
+        <h2 className="text-center text-xl font-bold text-slate-800">What best describes you?</h2>
+        <p className="mb-6 mt-2 text-center text-sm text-slate-500">
           This helps us tailor guidance on what to include in your resume. You can change this anytime.
         </p>
 
@@ -51,9 +52,9 @@ export default function OnboardingModal({ onSelect }: Props) {
               disabled={saving}
               className="flex items-center gap-3 rounded-xl border border-slate-200 p-4 text-left transition-all hover:border-indigo-300 hover:bg-indigo-50 disabled:opacity-50"
             >
-              <span className="text-2xl">{pt.icon}</span>
+              <pt.icon className="h-6 w-6 shrink-0 text-slate-600" aria-hidden="true" strokeWidth={1.8} />
               <div>
-                <p className="font-semibold text-slate-800 text-sm">{pt.label}</p>
+                <p className="text-sm font-semibold text-slate-800">{pt.label}</p>
                 <p className="text-xs text-slate-400">{pt.desc}</p>
               </div>
             </button>
@@ -63,7 +64,7 @@ export default function OnboardingModal({ onSelect }: Props) {
         <button
           onClick={handleSkip}
           disabled={saving}
-          className="w-full mt-5 text-xs text-slate-400 hover:text-slate-600 transition-colors"
+          className="mt-5 w-full text-xs text-slate-400 transition-colors hover:text-slate-600"
         >
           Skip for now
         </button>
